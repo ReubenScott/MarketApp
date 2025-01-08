@@ -1,4 +1,4 @@
-package com.kindustry.market
+package com.kindustry.market.ui.page
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,33 +18,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.kindustry.market.R
 
 @Composable
-fun PhotographerCard(modifier: Modifier = Modifier){
+fun LoginPage(navController: NavController, modifier: Modifier = Modifier){
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(4.dp))
             .background(color = MaterialTheme.colors.surface)
-            .clickable(onClick = {})
+            .clickable(onClick = {
+                navController.navigate("main") // 替换为你的路由名称
+            })
             .padding(16.dp)
     ) {
-        Surface (
-            modifier = Modifier.size(50.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.2f)
-        ){
-            Image(
-                painter = painterResource(id = R.drawable.snap1),
-                contentDescription = null
-            )
-        }
-
         Column(
             modifier = Modifier
                 .padding(start = 8.dp)
                 .align(Alignment.CenterVertically)
         ) {
-            Text(text = "Alfred Sisley", fontWeight = FontWeight.Bold)
+            Text(text = "Login In", fontWeight = FontWeight.Bold)
             CompositionLocalProvider(
                 LocalContentAlpha provides ContentAlpha.medium
             ) {

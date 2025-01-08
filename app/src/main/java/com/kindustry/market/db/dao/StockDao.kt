@@ -28,6 +28,9 @@ interface StockDao {
     @Query("SELECT * FROM company_statistics ORDER BY symbol ASC Limit 10")
     fun getAllStock(): Flow<List<Stock>>
 
+    @Query("SELECT * FROM company_statistics ORDER BY RANDOM() Limit 50")
+    fun getRandomStock(): Flow<List<Stock>>
+
     // Select Annotation
     @Query("SELECT * FROM company_statistics WHERE symbol=:noteID")
     fun selectNoteID(noteID: Int): Flow<Stock?>
