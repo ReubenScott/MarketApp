@@ -25,6 +25,8 @@ import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
 import com.kindustry.market.R
 import com.kindustry.market.db.entity.Stock
+import com.kindustry.market.ui.component.DropdownMenuExample
+import com.kindustry.market.ui.component.DropdownMenuWithDescription
 import com.kindustry.market.ui.component.SideDrawer
 import com.kindustry.market.viewmodel.StockInfo
 
@@ -72,6 +74,8 @@ fun MainPage(navController: NavController, reopened: String = "false", stocks: L
                     properties = DialogProperties(usePlatformDefaultWidth = false), // 禁用平台默认宽度
                     content = {
                         SideDrawer()
+//                        DropdownMenuExample()
+//                        DropdownMenuWithDescription()
                     }
                 )
             }

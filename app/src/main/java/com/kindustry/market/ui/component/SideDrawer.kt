@@ -4,10 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,7 +12,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 
+//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SideDrawer(
 //    onDismissRequest: () -> Unit,
@@ -52,6 +53,11 @@ fun SideDrawer(
                     label = { Text("请输入查询内容") }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+
+
+                DropdownMenuExample()
+
+
                 Row {
                     Button(onClick = { /* onDismissRequest() */}) {
                         Text("取消")
@@ -66,25 +72,105 @@ fun SideDrawer(
     }
 }
 
-/*
-
-//@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun DropdownExample() {
-    var expanded by remember { mutableStateOf(false) } // 控制下拉菜单的显示/隐藏
-    var selectedItem by remember { mutableStateOf("Option 1") } // 记录选中的选项
+fun DropdownMenuExample() {
+    var selectedIndex by remember { mutableStateOf(-1) }
+    val items = listOf("Item 1", "Item 2", "Item 3")
 
-    Box(Modifier.wrapContentSize(Alignment.TopStart)) {
-        ExposedDropdownMenu {
-            items.forEach { item ->
-                DropdownMenuItem(onClick = {
-                    selectedItem = item.name
-                    expanded = false
-                }) {
-                    Text(text = item.name)
+    var selectedIndex1 by remember { mutableStateOf(-1) }
+    val exchanges = listOf("exchange 1", "exchange 2", "exchange 3")
+
+    Column {
+        DropdownMenuWithLabel(
+            label = "業種 ： ",
+            items = items,
+            selectedIndex = selectedIndex,
+            onSelectionChanged = { selectedIndex = it }
+        )
+        DropdownMenuWithLabel(
+            label = "市場区分 ： ",
+            items = exchanges,
+            selectedIndex = selectedIndex1,
+            onSelectionChanged = { selectedIndex1 = it }
+        )
+    }
+}
+
+@Composable
+fun DropdownMenuWithLabel(
+    label: String,
+    items: List<String>,
+    selectedIndex: Int,
+    onSelectionChanged: (Int) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        Button(
+            onClick = { expanded = !expanded }
+        ) {
+            Text(text = label)
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text = if (selectedIndex >= 0) items[selectedIndex] else "")
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            items.forEachIndexed { index, item ->
+                DropdownMenuItem(
+                    onClick = {
+                        onSelectionChanged(index)
+                        expanded = false
+                    }
+                ) {
+                    Text(text = item)
                 }
             }
         }
     }
 }
-* */
+
+
+
+data class DropdownMenuItemData(val name: String, val description: String)
+
+@Composable
+fun DropdownMenuWithDescription() {
+    var expanded by remember { mutableStateOf(false) }
+    val items = listOf(
+        DropdownMenuItemData("Item 1", "This is the first item"),
+        DropdownMenuItemData("Item 2", "This is the second item with a longer description"),
+        DropdownMenuItemData("Item 3", "Item 3")
+    )
+    var selectedIndex by remember { mutableStateOf(0) }
+
+    Box {
+        Button(
+            onClick = { expanded = !expanded }
+        ) {
+            Text(text = items[selectedIndex].name)
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            items.forEachIndexed { index, item ->
+                DropdownMenuItem(
+                    onClick = {
+                        selectedIndex = index
+                        expanded = false
+                    }
+                ) {
+                    Column {
+                        Text(text = item.name)
+                        Text(text = item.description, style = MaterialTheme.typography.caption) // 调整描述的样式
+                    }
+                }
+            }
+        }
+    }
+}
