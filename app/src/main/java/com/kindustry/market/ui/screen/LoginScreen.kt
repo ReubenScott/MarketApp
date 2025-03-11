@@ -1,4 +1,4 @@
-package com.kindustry.market.ui.page
+package com.kindustry.market.ui.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,7 +22,7 @@ import androidx.navigation.NavController
 import com.kindustry.market.R
 
 @Composable
-fun LoginPage(navController: NavController, modifier: Modifier = Modifier){
+fun LoginScreen(navController: NavController, modifier: Modifier = Modifier){
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(4.dp))

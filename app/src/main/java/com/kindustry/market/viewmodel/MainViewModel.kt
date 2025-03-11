@@ -12,8 +12,13 @@ import javax.inject.Inject
 
 // 定义 UI 状态数据类
 data class StockInfo(
-    val symbol: String,
-    val name: String
+    val symbol: String,  // コード
+    val name: String,    // 銘柄名
+    val sector: String,  // 東証業種名
+    val dividendYield: Float?,  // 配当利回り
+    val debtAssetRatio: Float?,  // 負債比率  (债务权益比率debtEquityRatioから計算)
+    val per: Float?,  // 株価収益率
+    val pbr: Float?  // 株価純資産倍率
 )
 
 @HiltViewModel
@@ -30,19 +35,15 @@ class MainViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
 
-    // Flow<List<Stock>>
-    private val _stocks = MutableStateFlow<List<Stock>>(emptyList())
-    val stocks: StateFlow<List<Stock>> = _stocks.asStateFlow()
+    //  Stock Flow
+    private val _stockState = MutableStateFlow<List<StockInfo>>(emptyList())
+    val stocksFlow: StateFlow<List<StockInfo>> = _stockState.asStateFlow()
 
     fun randomGet() {
         viewModelScope.launch {
-            _stocks.value = companyRepository.randomStocks.first()
+            _stockState.value = companyRepository.randomStocks.first().map{ it.toStockInfo() }
         }
     }
-
-
-    private val _uiState = MutableStateFlow<List<StockInfo>>(emptyList())
-    val stockListState: StateFlow<List<StockInfo>> = _uiState.asStateFlow()
 
     fun getRandomStock() {
         viewModelScope.launch {
@@ -52,7 +53,7 @@ class MainViewModel @Inject constructor(
                     if (stockInfo != null) listOf(stockInfo) else emptyList() // Create a list
                 }
                 .collect { stockInfoList  ->
-                    _uiState.value = stockInfoList
+                    _stockState.value = stockInfoList
                 }
         }
     }
@@ -72,7 +73,17 @@ class MainViewModel @Inject constructor(
 
     // 扩展函数，方便转换
     fun Stock.toStockInfo(): StockInfo {
-        return StockInfo(symbol, name ?: "") // 处理 name 为 null 的情况
+        return StockInfo(
+            symbol,
+            name     ?: "", // 处理 name 为 null 的情况
+            sector  ?: "",
+            dividendYield ,
+            debtEquityRatio?.let{
+                it / (it + 100f) * 100f  // 债务权益比率　から計算
+            },
+            per,
+            pbr
+        )
     }
 
 }

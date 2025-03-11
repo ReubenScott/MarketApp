@@ -23,7 +23,8 @@ fun SideDrawer(
 //    onSubmit: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
-    var query by remember { mutableStateOf("") }
+    var symbol by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val box = createRef()
@@ -47,13 +48,28 @@ fun SideDrawer(
 //                    .background(Color.White.copy(alpha = 0.8f))
 //                    .align(Alignment.CenterStart) // 对齐到左侧
             ) {
-                TextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    label = { Text("请输入查询内容") }
+                OutlinedTextField(
+                    value = symbol,
+                    onValueChange = { symbol = it },
+                    label = { Text("コード") }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                OutlinedTextField(
+//                    readOnly = true,
+                    value = name, // selectedOptionText
+                    onValueChange = { name = it },
+                    label = { Text("銘柄名") },
+//                    trailingIcon = {
+//                        ExposedDropdownMenuDefaults.TrailingIcon(
+//                            expanded = expanded
+//                        )
+//                    },
+//                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
+//                    modifier = Modifier.menuAnchor()
+                )
+
+                BasicSlider()
 
                 DropdownMenuExample()
 
@@ -74,27 +90,40 @@ fun SideDrawer(
 
 @Composable
 fun DropdownMenuExample() {
-    var selectedIndex by remember { mutableStateOf(-1) }
-    val items = listOf("Item 1", "Item 2", "Item 3")
+    // 市場区分
+    var index0 by remember { mutableStateOf(-1) }
+    val exchanges = listOf("東証プライム", "東証スタンダード", "東証グロース")
 
-    var selectedIndex1 by remember { mutableStateOf(-1) }
-    val exchanges = listOf("exchange 1", "exchange 2", "exchange 3")
+    // 業種
+    var index1 by remember { mutableStateOf(-1) }
+    val items = listOf("Item 1", "Item 2", "Item 3")
 
     Column {
         DropdownMenuWithLabel(
-            label = "業種 ： ",
-            items = items,
-            selectedIndex = selectedIndex,
-            onSelectionChanged = { selectedIndex = it }
-        )
-        DropdownMenuWithLabel(
             label = "市場区分 ： ",
             items = exchanges,
-            selectedIndex = selectedIndex1,
-            onSelectionChanged = { selectedIndex1 = it }
+            selectedIndex = index0,
+            onSelectionChanged = { index0 = it }
+        )
+        DropdownMenuWithLabel(
+            label = "業種 ： ",
+            items = items,
+            selectedIndex = index1,
+            onSelectionChanged = { index1 = it }
         )
     }
 }
+
+@Composable
+fun BasicSlider() {
+    var sliderPosition by remember { mutableStateOf(0f) }
+    Slider(
+        value = sliderPosition,
+        onValueChange = { sliderPosition = it }
+    )
+    Text("当前值：${sliderPosition}") // 显示当前值
+}
+
 
 @Composable
 fun DropdownMenuWithLabel(
@@ -106,7 +135,7 @@ fun DropdownMenuWithLabel(
     var expanded by remember { mutableStateOf(false) }
 
     Box {
-        Button(
+        TextButton(
             onClick = { expanded = !expanded }
         ) {
             Text(text = label)

@@ -1,25 +1,27 @@
 package com.kindustry.market.component
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kindustry.market.R
+import com.kindustry.market.viewmodel.StockInfo
 
 @Composable
 fun StockCard(navController: NavController, modifier: Modifier = Modifier){
@@ -57,4 +59,60 @@ fun StockCard(navController: NavController, modifier: Modifier = Modifier){
         }
     }
 
+}
+
+@Composable
+fun Conversation(messages : List<StockInfo>){
+    LazyColumn(){
+        items(messages){
+                message -> MessageCard(message)
+        }
+    }
+}
+
+
+@Composable
+fun MessageCard(msg: StockInfo) {
+    Row(
+        modifier = Modifier
+            .padding(all = 8.dp)
+            .background(MaterialTheme.colors.background)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.snap1),
+            contentDescription = null,
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        var isExpanded by remember {
+            mutableStateOf(false )
+        }
+        val surfaceColor: Color by animateColorAsState(
+            if(isExpanded) MaterialTheme.colors.primary else MaterialTheme.colors.surface
+        )
+        Column (
+            modifier = Modifier.clickable {isExpanded = !isExpanded}
+        ){
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = msg.symbol, color = MaterialTheme.colors.secondaryVariant)
+            Spacer(modifier = Modifier.height(4.dp))
+            Surface(
+                color = surfaceColor,
+                shape = MaterialTheme.shapes.medium,
+                elevation = 1.dp,
+                modifier = Modifier
+                    .animateContentSize()
+                    .padding(1.dp)
+            ) {
+                Text(
+                    text = msg.name,
+                    modifier = Modifier.padding(all = 4.dp),
+                    style = MaterialTheme.typography.body2,
+                    maxLines = if(isExpanded) Int.MAX_VALUE else 1
+                )
+            }
+        }
+    }
 }

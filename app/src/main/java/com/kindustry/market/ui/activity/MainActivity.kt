@@ -7,20 +7,15 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 
-import com.kindustry.market.screen.MainPage
-import com.kindustry.market.screen.MessageCard
-import com.kindustry.market.ui.page.LoginPage
+import com.kindustry.market.ui.screen.MainScreen
+import com.kindustry.market.ui.screen.LoginScreen
 import com.kindustry.market.ui.theme.MarketTheme
 import com.kindustry.market.viewmodel.MainViewModel
-import com.kindustry.market.viewmodel.StockInfo
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -54,15 +49,20 @@ class MainActivity : ComponentActivity() {
                     // 设置 Navigation Host
                     NavHost(navController = navController, startDestination = "main") {
                         composable("main") { // 定义 "main" 路由
-                            MainPage(
+                            MainScreen(
                                 navController ,// 将 NavController 传递给 MainPage
-                                stocks = mainViewModel.stocks.collectAsState(initial = emptyList()).value,
-                                onButtonClick = { mainViewModel.randomGet() }
+//                                stocks = mainViewModel.stocksFlow.collectAsState(initial = emptyList()).value,
+                                mainViewModel = mainViewModel,
+                                onListClick = { mainViewModel.randomGet() },
+                                onPreviewClick = { mainViewModel.randomGet() },
+                                onChartClick = { mainViewModel.randomGet()},
+                                onInfoClick = { mainViewModel.randomGet()},
+                                onFavoriteClick = { mainViewModel.randomGet()}
                             )
                         }
                         composable("login") { backStackEntry -> // 定义带有参数的 "main" 路由
                             val reopened = backStackEntry.arguments?.getString("reopened") ?: "false"
-                            LoginPage(
+                            LoginScreen(
                                 navController //, reopened = reopened
                             )
                         }
@@ -79,11 +79,11 @@ class MainActivity : ComponentActivity() {
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    MarketTheme {
-        MessageCard(StockInfo(symbol = "Android", name = "Jectpack"))
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun DefaultPreview() {
+//    MarketTheme {
+//        MessageCard(StockInfo(symbol = "Android", name = "Jectpack"))
+//    }
+//}
 
