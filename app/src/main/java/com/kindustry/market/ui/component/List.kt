@@ -222,14 +222,14 @@ fun StockList(stocks: List<StockInfo>){
                     )
                     Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
                     Text(
-                        text = item.name ?: "", // 当 name 为 null 时，显示默认值
+                        text = item.name, // 当 name 为 null 时，显示默认值
 //                        text = item.name?.take(10)?.plus("...") ?: "", // 当 name 为 null 时，显示默认值
                         modifier = Modifier.weight(4f),
                         textAlign = TextAlign.Start // 左对齐
                     )
                     Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
                     Text(
-                        text = item.sector ?: "", // 当 name 为 null 时，显示默认值
+                        text = item.sector, // 当 name 为 null 时，显示默认值
                         modifier = Modifier.weight(2f),
                         textAlign = TextAlign.Start // 左对齐
                     )

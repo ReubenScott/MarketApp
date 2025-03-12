@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
 //                                stocks = mainViewModel.stocksFlow.collectAsState(initial = emptyList()).value,
                                 mainViewModel = mainViewModel,
                                 onListClick = { mainViewModel.randomGet() },
-                                onPreviewClick = { mainViewModel.randomGet() },
+                                onPreviewClick = { firstParam:String, secondParam:String -> mainViewModel.searchStocks(firstParam, secondParam) },
                                 onChartClick = { mainViewModel.randomGet()},
                                 onInfoClick = { mainViewModel.randomGet()},
                                 onFavoriteClick = { mainViewModel.randomGet()}

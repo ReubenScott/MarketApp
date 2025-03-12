@@ -1,30 +1,17 @@
 package com.kindustry.market.ui.screen
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
-import com.kindustry.market.R
 import com.kindustry.market.ui.component.MyFavorite
 import com.kindustry.market.ui.component.StockList
 import com.kindustry.market.ui.component.SideDrawer
 import com.kindustry.market.viewmodel.MainViewModel
-import com.kindustry.market.viewmodel.StockInfo
 
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -35,7 +22,7 @@ fun MainScreen(
     mainViewModel: MainViewModel,
 //    stocks: List<StockInfo>,
     onListClick: () -> Unit,
-    onPreviewClick: () -> Unit,
+    onPreviewClick: (String, String) -> Unit,
     onChartClick: () -> Unit,
     onInfoClick: () -> Unit,
     onFavoriteClick: () -> Unit
@@ -44,15 +31,13 @@ fun MainScreen(
     var showDialog by remember { mutableStateOf(false) }
     val screenState = remember { mutableStateOf(ScreenState.A) }
 
+    // 获取一次  市场区分
+    val exchangeList = mainViewModel.allExchangeFlow.collectAsState(initial = emptyList()).value
+    val sectorList = mainViewModel.allSectorFlow.collectAsState(initial = emptyList()).value
+
     // 订阅 stocksFlow 并更新 stocks 列表
     val stocks by mainViewModel.stocksFlow.collectAsState()
 
-//    LaunchedEffect(Unit) {
-//        mainViewModel.stocksFlow.collect { newStocks ->
-//            stocks.clear()
-//            stocks.addAll(newStocks)
-//        }
-//    }
 
     Scaffold (
         topBar = {
@@ -64,7 +49,7 @@ fun MainScreen(
                     IconButton(onClick = { /* 处理菜单点击事件 */
                         showDialog = true
                     }) {
-                        Icon(Icons.Filled.FilterList, contentDescription = "FilterList")
+                        Icon(imageVector = Icons.Filled.FilterList, contentDescription = "FilterList")
                     }
                 },
                 actions = {
@@ -90,7 +75,15 @@ fun MainScreen(
                     onDismissRequest = { showDialog = false },
                     properties = DialogProperties(usePlatformDefaultWidth = false), // 禁用平台默认宽度
                     content = {
-                        SideDrawer()
+                        SideDrawer(
+                            exchangeList,
+                            sectorList,
+                            { firstParam:String, secondParam:String ->
+                                showDialog = false
+                                onPreviewClick(firstParam, secondParam)
+                                screenState.value = ScreenState.A
+                            }
+                        )
 //                        DropdownMenuExample()
 //                        DropdownMenuWithDescription()
                     }
@@ -110,7 +103,7 @@ fun MainScreen(
                 )
                 BottomNavigationItem(
                     selected = true,
-                    onClick = onPreviewClick ,
+                    onClick = { onPreviewClick("TODO1", "TODO2") } ,  //  TODO
                     icon = { Icon(Icons.Default.Preview, contentDescription = "Preview") },
                     label = { Text(text = "Preview") }
                 )

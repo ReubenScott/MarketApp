@@ -15,16 +15,23 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import com.kindustry.market.viewmodel.StockInfo
 
 //@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SideDrawer(
 //    onDismissRequest: () -> Unit,
-//    onSubmit: (String) -> Unit
+    exchanges: List<String>,
+    sectors: List<String>,
+    onSubmit: (String, String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     var symbol by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+    var exchange by remember { mutableStateOf("") }
+    var sector by remember { mutableStateOf("") }
+
+
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val box = createRef()
@@ -71,7 +78,7 @@ fun SideDrawer(
 
                 BasicSlider()
 
-                DropdownMenuExample()
+                DropdownMenuExample(exchanges, sectors, {exchange = it} , {sector = it} )
 
 
                 Row {
@@ -79,7 +86,7 @@ fun SideDrawer(
                         Text("取消")
                     }
                     Spacer(modifier = Modifier.width(16.dp))
-                    Button(onClick = { /*  onSubmit(query) */}) {
+                    Button(onClick = {  onSubmit(exchange, sector) }) {
                         Text("提交")
                     }
                 }
@@ -88,31 +95,6 @@ fun SideDrawer(
     }
 }
 
-@Composable
-fun DropdownMenuExample() {
-    // 市場区分
-    var index0 by remember { mutableStateOf(-1) }
-    val exchanges = listOf("東証プライム", "東証スタンダード", "東証グロース")
-
-    // 業種
-    var index1 by remember { mutableStateOf(-1) }
-    val items = listOf("Item 1", "Item 2", "Item 3")
-
-    Column {
-        DropdownMenuWithLabel(
-            label = "市場区分 ： ",
-            items = exchanges,
-            selectedIndex = index0,
-            onSelectionChanged = { index0 = it }
-        )
-        DropdownMenuWithLabel(
-            label = "業種 ： ",
-            items = items,
-            selectedIndex = index1,
-            onSelectionChanged = { index1 = it }
-        )
-    }
-}
 
 @Composable
 fun BasicSlider() {
@@ -122,6 +104,43 @@ fun BasicSlider() {
         onValueChange = { sliderPosition = it }
     )
     Text("当前值：${sliderPosition}") // 显示当前值
+}
+
+@Composable
+fun DropdownMenuExample(
+    exchanges: List<String> ,
+    sectors: List<String>,
+    onExchangeSelect: (String) -> Unit,
+    onSectorSelect: (String) -> Unit,
+) {
+    // 市場区分
+    var index0 by remember { mutableStateOf(-1) }
+//    val exchanges = listOf("東証プライム", "東証スタンダード", "東証グロース")
+
+    // 業種
+    var index1 by remember { mutableStateOf(-1) }
+//    val items = listOf("Item 1", "Item 2", "Item 3")
+
+    Column {
+        DropdownMenuWithLabel(
+            label = "市場区分 ： ",
+            items = exchanges,
+            selectedIndex = index0,
+            onSelectionChanged = {
+                index0 = it
+                onExchangeSelect(exchanges[it])
+            }
+        )
+        DropdownMenuWithLabel(
+            label = "業種 ： ",
+            items = sectors,
+            selectedIndex = index1,
+            onSelectionChanged = {
+                index1 = it
+                onSectorSelect(sectors[it])
+            }
+        )
+    }
 }
 
 
@@ -141,7 +160,7 @@ fun DropdownMenuWithLabel(
             Text(text = label)
             Spacer(modifier = Modifier.width(10.dp))
             Text(text = if (selectedIndex >= 0) items[selectedIndex] else "")
-            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+            Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = null)
         }
 
         DropdownMenu(

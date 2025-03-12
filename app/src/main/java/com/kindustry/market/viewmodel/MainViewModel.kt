@@ -25,15 +25,21 @@ data class StockInfo(
 class MainViewModel @Inject constructor(
     private val companyRepository: CompanyRepository
 ) : ViewModel() {
-    val readAll = companyRepository.readAll
 
-    // 直接转换 readAll Flow
-    val stockInfoList: StateFlow<List<StockInfo>> = companyRepository.readAll.map { stockList ->
-        stockList.map { stock ->
-            stock.toStockInfo() // 使用扩展函数进行转换
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
+    // 扩展函数，方便转换
+    fun Stock.toStockInfo(): StockInfo {
+        return StockInfo(
+            symbol ,
+            name ?: "" ,  //  ?: ""处理 name 为 null 的情况
+            sector ?: "" ,
+            dividendYield ,
+            debtEquityRatio?.let{
+                it / (it + 100f) * 100f  // 债务权益比率　から計算
+            } ,
+            per ,
+            pbr
+        )
+    }
 
     //  Stock Flow
     private val _stockState = MutableStateFlow<List<StockInfo>>(emptyList())
@@ -41,8 +47,30 @@ class MainViewModel @Inject constructor(
 
     fun randomGet() {
         viewModelScope.launch {
-            _stockState.value = companyRepository.randomStocks.first().map{ it.toStockInfo() }
+            _stockState.value = companyRepository.randomStocks.first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
         }
+    }
+
+    // 全部 市场区分
+    val allExchangeFlow: Flow<List<String>> = companyRepository.allExchange
+
+    // 全部 業種
+    val allSectorFlow: Flow<List<String>> = companyRepository.allSector
+
+    // 直接转换 readAll Flow
+   /*
+   val stockInfoList: StateFlow<List<StockInfo>> = companyRepository.readAll.map { stockList ->
+        stockList.map { stock ->
+            stock.toStockInfo() // 使用扩展函数进行转换
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    */
+
+    fun searchStocks(exchange: String, sector: String): StateFlow<List<StockInfo>> {
+        viewModelScope.launch {
+            _stockState.value = companyRepository.getQueryStocks(exchange, sector).first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
+        }
+        return stocksFlow
     }
 
     fun getRandomStock() {
@@ -70,20 +98,5 @@ class MainViewModel @Inject constructor(
         }
     }
 
-
-    // 扩展函数，方便转换
-    fun Stock.toStockInfo(): StockInfo {
-        return StockInfo(
-            symbol,
-            name     ?: "", // 处理 name 为 null 的情况
-            sector  ?: "",
-            dividendYield ,
-            debtEquityRatio?.let{
-                it / (it + 100f) * 100f  // 债务权益比率　から計算
-            },
-            per,
-            pbr
-        )
-    }
 
 }

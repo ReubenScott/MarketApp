@@ -1,11 +1,7 @@
 package com.kindustry.market.db.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Update
-import androidx.room.Query
-import androidx.room.Delete
-import androidx.room.OnConflictStrategy
+import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 
 import com.kindustry.market.db.entity.Stock
@@ -13,20 +9,24 @@ import com.kindustry.market.db.entity.Stock
 @Dao
 interface StockDao {
 
+    @RawQuery(observedEntities = [Stock::class])
+    fun getStockList(query: SupportSQLiteQuery): Flow<List<Stock>>
+
     @Query("""
     SELECT * 
     FROM company_statistics
-    WHERE LOWER(name) LIKE '%' || LOWER(:query) || '%' OR 
-      UPPER(:query) == symbol
+    WHERE exchange =:exchange and sector =:sector  Limit 40
     """)
-    suspend fun getStockListings(query: String) : List<Stock>
+//    suspend fun getStockListings(query: String) : List<Stock>
+    fun getStockListings(exchange: String?, sector: String?) : Flow<List<Stock>>
 
-    @Query("DELETE FROM company_statistics")
-    suspend fun clearStockListings()
+    // 市場区分
+    @Query("SELECT '' UNION ALL SELECT distinct exchange FROM company_statistics ORDER BY 1 ASC")
+    fun getAllExchange(): Flow<List<String>>
 
-    // List Notes
-    @Query("SELECT * FROM company_statistics ORDER BY symbol ASC Limit 10")
-    fun getAllStock(): Flow<List<Stock>>
+    // 業種　東証業種名
+    @Query("SELECT '' UNION ALL SELECT distinct sector FROM company_statistics ORDER BY 1 ASC")
+    fun getAllSector(): Flow<List<String>>
 
     @Query("SELECT * FROM company_statistics ORDER BY RANDOM() Limit 50")
     fun getRandomStock(): Flow<List<Stock>>
