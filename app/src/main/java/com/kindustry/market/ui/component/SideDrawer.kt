@@ -86,7 +86,11 @@ fun SideDrawer(
                         Text("取消")
                     }
                     Spacer(modifier = Modifier.width(16.dp))
-                    Button(onClick = {  onSubmit(exchange, sector) }) {
+                    Button(onClick = {
+                        onSubmit(exchange, sector)
+//                        val list = listOf("param1", 2, true)
+//                        onListClick(list)
+                    }) {
                         Text("提交")
                     }
                 }

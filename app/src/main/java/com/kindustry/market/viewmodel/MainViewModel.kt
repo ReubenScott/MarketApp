@@ -42,14 +42,53 @@ class MainViewModel @Inject constructor(
     }
 
     //  Stock Flow
-    private val _stockState = MutableStateFlow<List<StockInfo>>(emptyList())
-    val stocksFlow: StateFlow<List<StockInfo>> = _stockState.asStateFlow()
+    private val _stockListState = MutableStateFlow<List<StockInfo>>(emptyList())
+    val stockListFlow: StateFlow<List<StockInfo>> = _stockListState.asStateFlow()
 
     fun randomGet() {
         viewModelScope.launch {
-            _stockState.value = companyRepository.randomStocks.first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
+            _stockListState.value = companyRepository.randomStocks.first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
         }
     }
+
+    fun getRandomStock() {
+        viewModelScope.launch {
+            companyRepository.randomStocks
+                .map { stockList ->
+                    val stockInfo = stockList.firstOrNull()?.toStockInfo()
+                    if (stockInfo != null) listOf(stockInfo) else emptyList() // Create a list
+                }
+                .collect { stockInfoList  ->
+                    _stockListState.value = stockInfoList
+                }
+        }
+    }
+
+//    fun searchStocks(exchange: String, sector: String): StateFlow<List<StockInfo>> {
+//        viewModelScope.launch {
+//            _stockState.value = companyRepository.getQueryStocks(exchange, sector).first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
+//        }
+//        return stocksFlow
+//    }
+
+
+    fun filterStocks(any: List<Any>) {
+        viewModelScope.launch {
+            _stockListState.value = companyRepository.getQueryStocks(any).first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
+        }
+    }
+
+
+    //  Stock Flow
+    private val _stockState = MutableStateFlow<Stock?>(null)
+    val stockFlow: StateFlow<Stock?> = _stockState.asStateFlow()
+
+    fun findStocks(symbol: String) {
+        viewModelScope.launch {
+            _stockState.value = companyRepository.getQueryStocks(symbol).first()  // 使用扩展函数进行转换
+        }
+    }
+
 
     // 全部 市场区分
     val allExchangeFlow: Flow<List<String>> = companyRepository.allExchange
@@ -66,25 +105,6 @@ class MainViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     */
 
-    fun searchStocks(exchange: String, sector: String): StateFlow<List<StockInfo>> {
-        viewModelScope.launch {
-            _stockState.value = companyRepository.getQueryStocks(exchange, sector).first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
-        }
-        return stocksFlow
-    }
-
-    fun getRandomStock() {
-        viewModelScope.launch {
-            companyRepository.randomStocks
-                .map { stockList ->
-                    val stockInfo = stockList.firstOrNull()?.toStockInfo()
-                    if (stockInfo != null) listOf(stockInfo) else emptyList() // Create a list
-                }
-                .collect { stockInfoList  ->
-                    _stockState.value = stockInfoList
-                }
-        }
-    }
 
 
 

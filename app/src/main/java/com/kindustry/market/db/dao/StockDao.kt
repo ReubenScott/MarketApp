@@ -33,7 +33,7 @@ interface StockDao {
 
     // Select Annotation
     @Query("SELECT * FROM company_statistics WHERE symbol=:noteID")
-    fun selectNoteID(noteID: Int): Flow<Stock?>
+    fun selectNoteID(noteID: String): Flow<Stock>
 
     // Insert Notes
     @Insert(onConflict = OnConflictStrategy.REPLACE)

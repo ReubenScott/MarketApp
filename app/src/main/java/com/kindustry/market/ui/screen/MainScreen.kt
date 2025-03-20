@@ -1,5 +1,6 @@
 package com.kindustry.market.ui.screen
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -8,11 +9,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
+import com.kindustry.market.ui.component.CompanyInfo
 import com.kindustry.market.ui.component.MyFavorite
 import com.kindustry.market.ui.component.StockList
 import com.kindustry.market.ui.component.SideDrawer
 import com.kindustry.market.viewmodel.MainViewModel
 
+val LocalPaddingValues = staticCompositionLocalOf<PaddingValues> { error("No PaddingValues provided") }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -21,29 +24,32 @@ fun MainScreen(
     reopened: String = "false",
     mainViewModel: MainViewModel,
 //    stocks: List<StockInfo>,
-    onListClick: () -> Unit,
-    onPreviewClick: (String, String) -> Unit,
-    onChartClick: () -> Unit,
-    onInfoClick: () -> Unit,
+    onListClick: (List<Any>) -> Unit,
+    onPreviewClick: (String) -> Unit,
+    onChartClick: (String, String) -> Unit,
+    onInfoClick: (String) -> Unit,
     onFavoriteClick: () -> Unit
 ){
     // 使用 remember 保存状态
     var showDialog by remember { mutableStateOf(false) }
     val screenState = remember { mutableStateOf(ScreenState.A) }
 
+    var symbol by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+
     // 获取一次  市场区分
     val exchangeList = mainViewModel.allExchangeFlow.collectAsState(initial = emptyList()).value
     val sectorList = mainViewModel.allSectorFlow.collectAsState(initial = emptyList()).value
 
     // 订阅 stocksFlow 并更新 stocks 列表
-    val stocks by mainViewModel.stocksFlow.collectAsState()
-
+    val stocks by mainViewModel.stockListFlow.collectAsState()
+    val stock by mainViewModel.stockFlow.collectAsState()
 
     Scaffold (
         topBar = {
             TopAppBar(
                 title = {
-                  Text(text = "LayoutStudy")
+                  Text(text = "${symbol}  ${name}" )
                 },
                 navigationIcon = {
                     IconButton(onClick = { /* 处理菜单点击事件 */
@@ -80,8 +86,10 @@ fun MainScreen(
                             sectorList,
                             { firstParam:String, secondParam:String ->
                                 showDialog = false
-                                onPreviewClick(firstParam, secondParam)
+                                onListClick( listOf(firstParam, secondParam) )
                                 screenState.value = ScreenState.A
+                                symbol = ""
+                                name = ""
                             }
                         )
 //                        DropdownMenuExample()
@@ -95,7 +103,7 @@ fun MainScreen(
                 BottomNavigationItem(
                     selected = true,
                     onClick = {
-                        onListClick()
+                        onListClick(emptyList<Any>())
                         screenState.value = ScreenState.A
                     } ,
                     icon = { Icon(Icons.Default.ListAlt, contentDescription = "ListAlt") },
@@ -103,19 +111,25 @@ fun MainScreen(
                 )
                 BottomNavigationItem(
                     selected = true,
-                    onClick = { onPreviewClick("TODO1", "TODO2") } ,  //  TODO
+                    onClick = {
+                        onPreviewClick(symbol)
+                        screenState.value = ScreenState.B
+                    } ,
                     icon = { Icon(Icons.Default.Preview, contentDescription = "Preview") },
                     label = { Text(text = "Preview") }
                 )
                 BottomNavigationItem(
                     selected = true,
-                    onClick = onChartClick , // Trigger refresh on home button click
+                    onClick =  { onChartClick("","") }  , //  TODO
                     icon = { Icon(Icons.Default.BarChart, contentDescription = "BarChart") },
                     label = { Text(text = "Chart") }
                 )
                 BottomNavigationItem(
                     selected = true,
-                    onClick = onInfoClick ,
+                    onClick = {
+                        onInfoClick(symbol)
+                        screenState.value = ScreenState.D
+                    },
                     icon = { Icon(Icons.Default.Info, contentDescription = "Info") },
                     label = { Text(text = "Info") }
                 )
@@ -132,13 +146,22 @@ fun MainScreen(
             }
         }
     ){
-        // Pass the data and function as props to SimpleColumn
-        when (screenState.value) {
-            ScreenState.A -> StockList(stocks = stocks)
-            ScreenState.B -> MyFavorite(stocks)
-            ScreenState.C -> MyFavorite(stocks)
-            ScreenState.D -> MyFavorite(stocks)
-            ScreenState.E -> MyFavorite(stocks)
+        paddingValues ->
+        CompositionLocalProvider(LocalPaddingValues provides paddingValues) {
+            // Pass the data and function as props to SimpleColumn
+            when (screenState.value) {
+                ScreenState.A -> StockList(
+                    stocks = stocks ,
+                    { firstParam:String, secondParam:String ->
+                        symbol = firstParam
+                        name = secondParam
+                    }
+                )
+                ScreenState.B -> MyFavorite(stocks)
+                ScreenState.C -> MyFavorite(stocks)
+                ScreenState.D -> CompanyInfo(stock)
+                ScreenState.E -> MyFavorite(stocks)
+            }
         }
 
     }

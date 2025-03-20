@@ -102,7 +102,7 @@ data class Stock(
     val indexAdoption          :  String?,      // 指数採用
 
     @ColumnInfo(name = "per_unit")
-    val perUnit                :  String?,      // 単元株数
+    val perUnit                :  String?,      // 単元株数 unitShares
 
     @ColumnInfo(name = "issued_shares")
     val issuedShares           :  Int?,      // 発行済株数

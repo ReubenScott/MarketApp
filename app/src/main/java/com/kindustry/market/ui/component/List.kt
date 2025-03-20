@@ -2,6 +2,7 @@ package com.kindustry.market.ui.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -87,7 +88,10 @@ fun ImageListItem(index: Int){
 
 
 @Composable
-fun StockList(stocks: List<StockInfo>){
+fun StockList(
+    stocks: List<StockInfo>,
+    onSubmit: (String, String) -> Unit
+){
 //    val scrollState = rememberScrollState()
     val lazyListState = rememberLazyListState()
     val coroutlineScope =  rememberCoroutineScope()
@@ -214,6 +218,10 @@ fun StockList(stocks: List<StockInfo>){
                         .background(
                             if (index % 2 == 0) Color.White else Color.LightGray
                         )
+                        .clickable {
+                            // 在这里处理点击事件
+                            onSubmit(item.symbol, item.name)
+                        }
                 ) {
                     Text(
                         text = item.symbol,
