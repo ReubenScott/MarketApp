@@ -2,7 +2,6 @@ package com.kindustry.market.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,17 +16,6 @@ import com.kindustry.market.ui.screen.LocalPaddingValues
 @Composable
 fun CompanyInfo(
     stock: Stock?
-//    companyName: String,
-//    englishCompanyName: String,
-//    industry: String,
-//    representative: String,
-//    fiscalYear: String,
-//    capital: String,
-//    address: String,
-//    irPhoneNumber: String,
-//    listedMarket: String,
-//    listingDate: String,
-//    unitShares: String
 ) {
     Column(
         modifier = Modifier.padding(LocalPaddingValues.current)

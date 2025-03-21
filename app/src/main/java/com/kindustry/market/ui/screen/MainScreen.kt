@@ -23,7 +23,6 @@ fun MainScreen(
     navController: NavController,
     reopened: String = "false",
     mainViewModel: MainViewModel,
-//    stocks: List<StockInfo>,
     onListClick: (List<Any>) -> Unit,
     onPreviewClick: (String) -> Unit,
     onChartClick: (String, String) -> Unit,
@@ -103,7 +102,7 @@ fun MainScreen(
                 BottomNavigationItem(
                     selected = true,
                     onClick = {
-                        onListClick(emptyList<Any>())
+//                        onListClick(emptyList<Any>())
                         screenState.value = ScreenState.A
                     } ,
                     icon = { Icon(Icons.Default.ListAlt, contentDescription = "ListAlt") },

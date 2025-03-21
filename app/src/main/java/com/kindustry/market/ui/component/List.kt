@@ -1,8 +1,6 @@
 package com.kindustry.market.ui.component
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -17,6 +15,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
+import com.kindustry.market.ui.screen.LocalPaddingValues
 import kotlinx.coroutines.launch
 import com.kindustry.market.viewmodel.StockInfo
 
@@ -92,7 +91,6 @@ fun StockList(
     stocks: List<StockInfo>,
     onSubmit: (String, String) -> Unit
 ){
-//    val scrollState = rememberScrollState()
     val lazyListState = rememberLazyListState()
     val coroutlineScope =  rememberCoroutineScope()
 
@@ -112,8 +110,7 @@ fun StockList(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
-//        modifier = Modifier.fillMaxSize().verticalScroll(scrollState) ,
+        modifier = Modifier.padding(LocalPaddingValues.current),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
