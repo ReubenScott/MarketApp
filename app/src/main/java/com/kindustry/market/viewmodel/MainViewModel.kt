@@ -46,12 +46,14 @@ class MainViewModel @Inject constructor(
     val stockListFlow: StateFlow<List<StockInfo>> = _stockListState.asStateFlow()
 
     fun randomGet() {
+        // 启动一个协程（Coroutine）
         viewModelScope.launch {
             _stockListState.value = companyRepository.randomStocks.first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
         }
     }
 
     fun getRandomStock() {
+        // 启动一个协程（Coroutine）
         viewModelScope.launch {
             companyRepository.randomStocks
                 .map { stockList ->
@@ -64,6 +66,49 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private val _scrollPosition = MutableStateFlow(0)
+    val scrollPosition: StateFlow<Int> = _scrollPosition
+
+    fun setScrollPosition(position: Int) {
+        _scrollPosition.value = position
+    }
+
+    //  Sort Flow
+    private val _isAscendingState = MutableStateFlow(true)
+    val isAscendingFlow: StateFlow<Boolean> = _isAscendingState.asStateFlow()
+
+    fun updateIsAscending(value: Boolean) {
+        viewModelScope.launch {
+            _isAscendingState.value = value
+        }
+    }
+
+    private val _sortColumnState = MutableStateFlow("")
+    val sortColumnFlow: StateFlow<String> = _sortColumnState.asStateFlow()
+
+    fun updateSortColumn(value: String) {
+        viewModelScope.launch {
+            _sortColumnState.value = value
+        }
+    }
+
+    fun sortStockInfo(sortColumn: String, isAscending: Boolean) {
+        // 启动一个协程（Coroutine）
+        viewModelScope.launch {
+            var stocks =  _stockListState.value
+            stocks = when (sortColumn) {
+                "name" -> if (isAscending) stocks.sortedBy { it.name } else stocks.sortedByDescending { it.name }
+                "sector" -> if (isAscending) stocks.sortedBy { it.sector } else stocks.sortedByDescending { it.sector }
+                "dividendYield" -> if (isAscending) stocks.sortedBy { it.dividendYield } else stocks.sortedByDescending { it.dividendYield }
+                "debtAssetRatio" -> if (isAscending) stocks.sortedBy { it.debtAssetRatio } else stocks.sortedByDescending { it.debtAssetRatio }
+                "per" -> if (isAscending) stocks.sortedBy { it.per } else stocks.sortedByDescending { it.per }
+                "pbr" -> if (isAscending) stocks.sortedBy { it.pbr } else stocks.sortedByDescending { it.pbr }
+                else -> if (isAscending) stocks.sortedBy { it.symbol } else stocks.sortedByDescending { it.symbol } // 默认按 symbol 排序
+            }
+            _stockListState.value = stocks
+        }
+    }
+
 //    fun searchStocks(exchange: String, sector: String): StateFlow<List<StockInfo>> {
 //        viewModelScope.launch {
 //            _stockState.value = companyRepository.getQueryStocks(exchange, sector).first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
@@ -73,6 +118,7 @@ class MainViewModel @Inject constructor(
 
 
     fun filterStocks(any: List<Any>) {
+        // 启动一个协程（Coroutine）
         viewModelScope.launch {
             _stockListState.value = companyRepository.getQueryStocks(any).first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
         }
@@ -84,6 +130,7 @@ class MainViewModel @Inject constructor(
     val stockFlow: StateFlow<Stock?> = _stockState.asStateFlow()
 
     fun findStocks(symbol: String) {
+        // 启动一个协程（Coroutine）
         viewModelScope.launch {
             _stockState.value = companyRepository.getQueryStocks(symbol).first()  // 使用扩展函数进行转换
         }
@@ -105,18 +152,6 @@ class MainViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     */
 
-
-
-
-    private val _count = MutableStateFlow(0)
-    val count: StateFlow<Int> = _count
-
-    fun incrementCount() {
-        // 启动一个协程（Coroutine）
-        viewModelScope.launch {
-            _count.value++
-        }
-    }
 
 
 }

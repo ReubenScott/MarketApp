@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.kindustry.market.ui.screen.LocalPaddingValues
+import com.kindustry.market.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 import com.kindustry.market.viewmodel.StockInfo
 
@@ -88,14 +90,20 @@ fun ImageListItem(index: Int){
 
 @Composable
 fun StockList(
-    stocks: List<StockInfo>,
+    viewModel: MainViewModel,
+//    stocks: List<StockInfo>,
     onSubmit: (String, String) -> Unit
 ){
-    val lazyListState = rememberLazyListState()
     val coroutlineScope =  rememberCoroutineScope()
 
+    val position by viewModel.scrollPosition.collectAsState()
+    val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = position)
+
+
+    /*
     var isAscending by remember { mutableStateOf(true) }
     var sortColumn by remember { mutableStateOf("") }
+
     var sortedStocks = remember(stocks, sortColumn, isAscending) {
         val sortedList = when (sortColumn) {
             "name" -> if (isAscending) stocks.sortedBy { it.name } else stocks.sortedByDescending { it.name }
@@ -107,6 +115,21 @@ fun StockList(
             else -> if (isAscending) stocks.sortedBy { it.symbol } else stocks.sortedByDescending { it.symbol } // 默认按 symbol 排序
         }
         sortedList.toMutableStateList()
+    }*/
+
+    val isAscending by viewModel.isAscendingFlow.collectAsState()
+    val sortColumn by viewModel.sortColumnFlow.collectAsState()
+    val sortedStocks by viewModel.stockListFlow.collectAsState()
+
+    LaunchedEffect(sortColumn, isAscending,position) {
+        viewModel.sortStockInfo(sortColumn, isAscending)
+        lazyListState.scrollToItem(position)
+    }
+
+    DisposableEffect(lazyListState) {
+        onDispose {
+            viewModel.setScrollPosition(lazyListState.firstVisibleItemIndex)
+        }
     }
 
     Column(
@@ -133,8 +156,10 @@ fun StockList(
                     style = MaterialTheme.typography.h6.copy(color = Color.White), // 使用主题中的标题样式，并设置颜色为白色
                     modifier = Modifier.weight(1.5f),// 让字段名占据整个宽度
                     onClick =  {
-                        isAscending = !isAscending
-                        sortColumn = "symbol"
+//                        isAscending = !isAscending
+//                        sortColumn = "symbol"
+                        viewModel.updateIsAscending(!isAscending)
+                        viewModel.updateSortColumn("symbol")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -143,8 +168,10 @@ fun StockList(
                     style = MaterialTheme.typography.h6.copy(color = Color.White), // 使用主题中的标题样式，并设置颜色为白色
                     modifier = Modifier.weight(4f), // 让字段名占据整个宽度
                     onClick =  {
-                        isAscending = !isAscending
-                        sortColumn = "name"
+//                        isAscending = !isAscending
+//                        sortColumn = "name"
+                        viewModel.updateIsAscending(!isAscending)
+                        viewModel.updateSortColumn("name")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -153,8 +180,10 @@ fun StockList(
                     style = MaterialTheme.typography.h6.copy(color = Color.White), // 使用主题中的标题样式，并设置颜色为白色
                     modifier = Modifier.weight(2f),// 让字段名占据整个宽度
                     onClick = {
-                        isAscending = !isAscending
-                        sortColumn = "sector"
+//                        isAscending = !isAscending
+//                        sortColumn = "sector"
+                        viewModel.updateIsAscending(!isAscending)
+                        viewModel.updateSortColumn("sector")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -163,8 +192,10 @@ fun StockList(
                     style = MaterialTheme.typography.h6.copy(color = Color.White, textAlign = TextAlign.End), // 使用主题中的标题样式，并设置颜色为白色
                     modifier = Modifier.weight(1.5f), // 让字段名占据整个宽度
                     onClick = {
-                        isAscending = !isAscending
-                        sortColumn = "dividendYield"
+//                        isAscending = !isAscending
+//                        sortColumn = "dividendYield"
+                        viewModel.updateIsAscending(!isAscending)
+                        viewModel.updateSortColumn("dividendYield")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -173,8 +204,10 @@ fun StockList(
                     style = MaterialTheme.typography.h6.copy(color = Color.White, textAlign = TextAlign.End), // 使用主题中的标题样式，并设置颜色为白色
                     modifier = Modifier.weight(1.5f), // 让字段名占据整个宽度
                     onClick = {
-                        isAscending = !isAscending
-                        sortColumn = "debtAssetRatio"
+//                        isAscending = !isAscending
+//                        sortColumn = "debtAssetRatio"
+                        viewModel.updateIsAscending(!isAscending)
+                        viewModel.updateSortColumn("debtAssetRatio")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -183,8 +216,10 @@ fun StockList(
                     style = MaterialTheme.typography.h6.copy(color = Color.White, textAlign = TextAlign.End), // 使用主题中的标题样式，并设置颜色为白色
                     modifier = Modifier.weight(1.5f), // 让字段名占据整个宽度
                     onClick = {
-                        isAscending = !isAscending
-                        sortColumn = "per"
+//                        isAscending = !isAscending
+//                        sortColumn = "per"
+                        viewModel.updateIsAscending(!isAscending)
+                        viewModel.updateSortColumn("per")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -193,8 +228,10 @@ fun StockList(
                     style = MaterialTheme.typography.h6.copy(color = Color.White, textAlign = TextAlign.End), // 使用主题中的标题样式，并设置颜色为白色
                     modifier = Modifier.weight(1f), // 让字段名占据整个宽度
                     onClick = {
-                        isAscending = !isAscending
-                        sortColumn = "pbr"
+//                        isAscending = !isAscending
+//                        sortColumn = "pbr"
+                        viewModel.updateIsAscending(!isAscending)
+                        viewModel.updateSortColumn("pbr")
                     }
                 )
             }

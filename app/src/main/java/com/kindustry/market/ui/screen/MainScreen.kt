@@ -150,7 +150,8 @@ fun MainScreen(
             // Pass the data and function as props to SimpleColumn
             when (screenState.value) {
                 ScreenState.A -> StockList(
-                    stocks = stocks ,
+//                    stocks = stocks ,
+                    viewModel = mainViewModel ,
                     { firstParam:String, secondParam:String ->
                         symbol = firstParam
                         name = secondParam
