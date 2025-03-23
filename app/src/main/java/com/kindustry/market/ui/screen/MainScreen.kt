@@ -9,9 +9,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
-import com.kindustry.market.ui.component.CompanyInfo
+import com.kindustry.market.component.EquityIndicator
+import com.kindustry.market.ui.component.EquityBasicInfo
 import com.kindustry.market.ui.component.MyFavorite
-import com.kindustry.market.ui.component.StockList
+import com.kindustry.market.ui.component.EquityList
 import com.kindustry.market.ui.component.SideDrawer
 import com.kindustry.market.viewmodel.MainViewModel
 
@@ -40,9 +41,9 @@ fun MainScreen(
     val exchangeList = mainViewModel.allExchangeFlow.collectAsState(initial = emptyList()).value
     val sectorList = mainViewModel.allSectorFlow.collectAsState(initial = emptyList()).value
 
-    // 订阅 stocksFlow 并更新 stocks 列表
-    val stocks by mainViewModel.stockListFlow.collectAsState()
-    val stock by mainViewModel.stockFlow.collectAsState()
+    // 订阅 equitysFlow 并更新 equitys 列表
+    val equitys by mainViewModel.equityListFlow.collectAsState()
+    val equity by mainViewModel.equityFlow.collectAsState()
 
     Scaffold (
         topBar = {
@@ -149,18 +150,18 @@ fun MainScreen(
         CompositionLocalProvider(LocalPaddingValues provides paddingValues) {
             // Pass the data and function as props to SimpleColumn
             when (screenState.value) {
-                ScreenState.A -> StockList(
-//                    stocks = stocks ,
+                ScreenState.A -> EquityList(
+//                    equitys = equitys ,
                     viewModel = mainViewModel ,
                     { firstParam:String, secondParam:String ->
                         symbol = firstParam
                         name = secondParam
                     }
                 )
-                ScreenState.B -> MyFavorite(stocks)
-                ScreenState.C -> MyFavorite(stocks)
-                ScreenState.D -> CompanyInfo(stock)
-                ScreenState.E -> MyFavorite(stocks)
+                ScreenState.B -> EquityIndicator(equity)
+                ScreenState.C -> MyFavorite(equitys)
+                ScreenState.D -> EquityBasicInfo(equity)
+                ScreenState.E -> MyFavorite(equitys)
             }
         }
 

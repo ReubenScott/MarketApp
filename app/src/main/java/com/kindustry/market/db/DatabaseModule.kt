@@ -26,5 +26,5 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDao(db: MarketDatabase) = db.stockDao
+    fun provideDao(db: MarketDatabase) = db.equityDao
 }

@@ -12,17 +12,17 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.kindustry.market.viewmodel.StockInfo
+import com.kindustry.market.viewmodel.EquityInfo
 
 // 使用示例
 @Composable
-fun MyFavorite(stocks: List<StockInfo>) {
+fun MyFavorite(equitys: List<EquityInfo>) {
     val outerList = listOf(
         listOf("Item 1", "Item 2", "Item 3"),
         listOf("Item A", "Item B", "Item C", "Item D"),
         listOf("One", "Two", "Three", "Four", "Five")
     )
-    val stringList = stocks.map {
+    val stringList = equitys.map {
         listOf(it.symbol, it.name, it.sector, it.dividendYield?.toString(), it.debtAssetRatio?.toString(), it.per?.toString(), it.pbr?.toString())
     }
     CombinedList(outerItems = stringList)

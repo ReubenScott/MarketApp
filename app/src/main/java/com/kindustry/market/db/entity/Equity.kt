@@ -2,14 +2,15 @@ package com.kindustry.market.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 /**
  * 定义实体类
  * 默认使用类名作为表名，可以指定
  */
-@Entity(tableName = "company_statistics")
-data class Stock(
+@Entity(tableName = "equity_statistics")
+data class Equity(
     @PrimaryKey
     @ColumnInfo(name = "symbol")
     val symbol                    : String, //  コード
@@ -117,7 +118,7 @@ data class Stock(
     val representative          :  String?,      // 代表者
 
     @ColumnInfo(name = "capital_stock")
-    val capitalStock           :  String?,      // 資本金
+    val capitalStock            :  String?,      // 資本金
 
     @ColumnInfo(name = "address")
     val address                 :  String?,      // 本社住所
@@ -157,11 +158,46 @@ data class Stock(
 
 )
 {
-//    constructor(a:String,p:Float,p2:Int,n:String):this(){
-//        this.author=a
-//        this.price=p
-//        this.pages=p2
-//        this.name=n
-//    }
+    // 计算字段，不存储在数据库中
+    @Ignore
+    var debtAssetRatio: Float? = 0.0f   // 負債比率
 
+    @Ignore
+    var movingAverageRatio: Float? = 0.0f   // 200日移動平均乖離率
+
+    @Ignore
+    var turnoverRate: Float? = 0.0f   // 売買回転率‰
+
+    // 你可以在这里添加计算字段的逻辑
+    init {
+        debtAssetRatio = calculateDebtAssetRatio()
+        movingAverageRatio = calculateMovingAverageRatio()
+        turnoverRate = calculateTurnoverRate()
+    }
+
+    // 计算 負債比率
+    private fun calculateDebtAssetRatio(): Float? {
+        return debtEquityRatio?.let{
+            val result = it / (it + 100f) * 100f  // 债务权益比率　から計算
+            String.format("%.2f", result).toFloat()  // 格式化结果
+        }
+    }
+
+    // 计算 200日移動平均乖離率
+    private fun calculateMovingAverageRatio(): Float? {
+        return presentPrice?.let {
+            movingAverage?.let {
+                String.format("%.2f", (presentPrice - it) * 100 / it).toFloat()
+            }
+        }
+    }
+
+    // 计算 売買回転率‰
+    private fun calculateTurnoverRate(): Float? {
+        return volume?.let {
+            issuedShares?.let {
+                String.format("%.2f", volume * 1000f / it).toFloat()
+            }
+        }
+    }
 }

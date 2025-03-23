@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController() // 创建 NavController
 
 //                val result by mainViewModel.readAll.collectAsState(initial = emptyList())
-//                val stocks = mainViewModel.stocks.collectAsState(initial = emptyList()).value
+//                val equitys = mainViewModel.equitys.collectAsState(initial = emptyList()).value
 
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
 //                    MainPage(
-//                        stocks = mainViewModel.stocks.collectAsState(initial = emptyList()).value,
+//                        equitys = mainViewModel.equitys.collectAsState(initial = emptyList()).value,
 //                        onButtonClick = { mainViewModel.randomGet() }
 //                    )
 
@@ -51,12 +51,12 @@ class MainActivity : ComponentActivity() {
                         composable("main") { // 定义 "main" 路由
                             MainScreen(
                                 navController ,// 将 NavController 传递给 MainPage
-//                                stocks = mainViewModel.stocksFlow.collectAsState(initial = emptyList()).value,
+//                                equitys = mainViewModel.equitysFlow.collectAsState(initial = emptyList()).value,
                                 mainViewModel = mainViewModel,
-                                onListClick = { any: List<Any> -> mainViewModel.filterStocks(any) },
-                                onPreviewClick = { firstParam:String -> mainViewModel.findStocks(firstParam) },
-                                onChartClick = { firstParam:String, secondParam:String -> mainViewModel.filterStocks(listOf(firstParam, secondParam)) },
-                                onInfoClick = { firstParam:String -> mainViewModel.findStocks(firstParam)},
+                                onListClick = { any: List<Any> -> mainViewModel.filterEquitys(any) },
+                                onPreviewClick = { firstParam:String -> mainViewModel.findEquitys(firstParam) },
+                                onChartClick = { firstParam:String, secondParam:String -> mainViewModel.filterEquitys(listOf(firstParam, secondParam)) },
+                                onInfoClick = { firstParam:String -> mainViewModel.findEquitys(firstParam)},
                                 onFavoriteClick = { mainViewModel.randomGet()}
                             )
                         }
@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
 //@Composable
 //fun DefaultPreview() {
 //    MarketTheme {
-//        MessageCard(StockInfo(symbol = "Android", name = "Jectpack"))
+//        MessageCard(EquityInfo(symbol = "Android", name = "Jectpack"))
 //    }
 //}
 

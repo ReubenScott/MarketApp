@@ -15,7 +15,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import com.kindustry.market.viewmodel.StockInfo
+import com.kindustry.market.viewmodel.EquityInfo
 
 //@OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -2,7 +2,7 @@ package com.kindustry.market.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kindustry.market.db.entity.Stock
+import com.kindustry.market.db.entity.Equity
 import com.kindustry.market.db.repository.CompanyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 
 // 定义 UI 状态数据类
-data class StockInfo(
+data class EquityInfo(
     val symbol: String,  // コード
     val name: String,    // 銘柄名
     val sector: String,  // 東証業種名
@@ -27,8 +27,8 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     // 扩展函数，方便转换
-    fun Stock.toStockInfo(): StockInfo {
-        return StockInfo(
+    fun Equity.toEquityInfo(): EquityInfo {
+        return EquityInfo(
             symbol ,
             name ?: "" ,  //  ?: ""处理 name 为 null 的情况
             sector ?: "" ,
@@ -41,27 +41,27 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    //  Stock Flow
-    private val _stockListState = MutableStateFlow<List<StockInfo>>(emptyList())
-    val stockListFlow: StateFlow<List<StockInfo>> = _stockListState.asStateFlow()
+    //  Equity Flow
+    private val _equityListState = MutableStateFlow<List<EquityInfo>>(emptyList())
+    val equityListFlow: StateFlow<List<EquityInfo>> = _equityListState.asStateFlow()
 
     fun randomGet() {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _stockListState.value = companyRepository.randomStocks.first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
+            _equityListState.value = companyRepository.randomEquitys.first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
         }
     }
 
-    fun getRandomStock() {
+    fun getRandomEquity() {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            companyRepository.randomStocks
-                .map { stockList ->
-                    val stockInfo = stockList.firstOrNull()?.toStockInfo()
-                    if (stockInfo != null) listOf(stockInfo) else emptyList() // Create a list
+            companyRepository.randomEquitys
+                .map { equityList ->
+                    val EquityInfo = equityList.firstOrNull()?.toEquityInfo()
+                    if (EquityInfo != null) listOf(EquityInfo) else emptyList() // Create a list
                 }
-                .collect { stockInfoList  ->
-                    _stockListState.value = stockInfoList
+                .collect { EquityInfoList  ->
+                    _equityListState.value = EquityInfoList
                 }
         }
     }
@@ -92,47 +92,47 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun sortStockInfo(sortColumn: String, isAscending: Boolean) {
+    fun sortEquityInfo(sortColumn: String, isAscending: Boolean) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            var stocks =  _stockListState.value
-            stocks = when (sortColumn) {
-                "name" -> if (isAscending) stocks.sortedBy { it.name } else stocks.sortedByDescending { it.name }
-                "sector" -> if (isAscending) stocks.sortedBy { it.sector } else stocks.sortedByDescending { it.sector }
-                "dividendYield" -> if (isAscending) stocks.sortedBy { it.dividendYield } else stocks.sortedByDescending { it.dividendYield }
-                "debtAssetRatio" -> if (isAscending) stocks.sortedBy { it.debtAssetRatio } else stocks.sortedByDescending { it.debtAssetRatio }
-                "per" -> if (isAscending) stocks.sortedBy { it.per } else stocks.sortedByDescending { it.per }
-                "pbr" -> if (isAscending) stocks.sortedBy { it.pbr } else stocks.sortedByDescending { it.pbr }
-                else -> if (isAscending) stocks.sortedBy { it.symbol } else stocks.sortedByDescending { it.symbol } // 默认按 symbol 排序
+            var equitys =  _equityListState.value
+            equitys = when (sortColumn) {
+                "name" -> if (isAscending) equitys.sortedBy { it.name } else equitys.sortedByDescending { it.name }
+                "sector" -> if (isAscending) equitys.sortedBy { it.sector } else equitys.sortedByDescending { it.sector }
+                "dividendYield" -> if (isAscending) equitys.sortedBy { it.dividendYield } else equitys.sortedByDescending { it.dividendYield }
+                "debtAssetRatio" -> if (isAscending) equitys.sortedBy { it.debtAssetRatio } else equitys.sortedByDescending { it.debtAssetRatio }
+                "per" -> if (isAscending) equitys.sortedBy { it.per } else equitys.sortedByDescending { it.per }
+                "pbr" -> if (isAscending) equitys.sortedBy { it.pbr } else equitys.sortedByDescending { it.pbr }
+                else -> if (isAscending) equitys.sortedBy { it.symbol } else equitys.sortedByDescending { it.symbol } // 默认按 symbol 排序
             }
-            _stockListState.value = stocks
+            _equityListState.value = equitys
         }
     }
 
-//    fun searchStocks(exchange: String, sector: String): StateFlow<List<StockInfo>> {
+//    fun searchEquitys(exchange: String, sector: String): StateFlow<List<EquityInfo>> {
 //        viewModelScope.launch {
-//            _stockState.value = companyRepository.getQueryStocks(exchange, sector).first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
+//            _equityState.value = companyRepository.getQueryEquitys(exchange, sector).first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
 //        }
-//        return stocksFlow
+//        return equitysFlow
 //    }
 
 
-    fun filterStocks(any: List<Any>) {
+    fun filterEquitys(any: List<Any>) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _stockListState.value = companyRepository.getQueryStocks(any).first().map{ it.toStockInfo() }  // 使用扩展函数进行转换
+            _equityListState.value = companyRepository.getQueryEquitys(any).first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
         }
     }
 
 
-    //  Stock Flow
-    private val _stockState = MutableStateFlow<Stock?>(null)
-    val stockFlow: StateFlow<Stock?> = _stockState.asStateFlow()
+    //  Equity Flow
+    private val _equityState = MutableStateFlow<Equity?>(null)
+    val equityFlow: StateFlow<Equity?> = _equityState.asStateFlow()
 
-    fun findStocks(symbol: String) {
+    fun findEquitys(symbol: String) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _stockState.value = companyRepository.getQueryStocks(symbol).first()  // 使用扩展函数进行转换
+            _equityState.value = companyRepository.getQueryEquitys(symbol).first()  // 使用扩展函数进行转换
         }
     }
 
@@ -145,9 +145,9 @@ class MainViewModel @Inject constructor(
 
     // 直接转换 readAll Flow
    /*
-   val stockInfoList: StateFlow<List<StockInfo>> = companyRepository.readAll.map { stockList ->
-        stockList.map { stock ->
-            stock.toStockInfo() // 使用扩展函数进行转换
+   val EquityInfoList: StateFlow<List<EquityInfo>> = companyRepository.readAll.map { equityList ->
+        equityList.map { equity ->
+            equity.toEquityInfo() // 使用扩展函数进行转换
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     */

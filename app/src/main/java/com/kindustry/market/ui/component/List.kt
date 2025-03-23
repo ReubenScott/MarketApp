@@ -1,5 +1,7 @@
 package com.kindustry.market.ui.component
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,7 +21,7 @@ import coil.compose.rememberImagePainter
 import com.kindustry.market.ui.screen.LocalPaddingValues
 import com.kindustry.market.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
-import com.kindustry.market.viewmodel.StockInfo
+import com.kindustry.market.viewmodel.EquityInfo
 
 
 @Composable
@@ -89,9 +91,9 @@ fun ImageListItem(index: Int){
 
 
 @Composable
-fun StockList(
+fun EquityList(
     viewModel: MainViewModel,
-//    stocks: List<StockInfo>,
+//    equitys: List<EquityInfo>,
     onSubmit: (String, String) -> Unit
 ){
     val coroutlineScope =  rememberCoroutineScope()
@@ -104,25 +106,25 @@ fun StockList(
     var isAscending by remember { mutableStateOf(true) }
     var sortColumn by remember { mutableStateOf("") }
 
-    var sortedStocks = remember(stocks, sortColumn, isAscending) {
+    var sortedEquitys = remember(equitys, sortColumn, isAscending) {
         val sortedList = when (sortColumn) {
-            "name" -> if (isAscending) stocks.sortedBy { it.name } else stocks.sortedByDescending { it.name }
-            "sector" -> if (isAscending) stocks.sortedBy { it.sector } else stocks.sortedByDescending { it.sector }
-            "dividendYield" -> if (isAscending) stocks.sortedBy { it.dividendYield } else stocks.sortedByDescending { it.dividendYield }
-            "debtAssetRatio" -> if (isAscending) stocks.sortedBy { it.debtAssetRatio } else stocks.sortedByDescending { it.debtAssetRatio }
-            "per" -> if (isAscending) stocks.sortedBy { it.per } else stocks.sortedByDescending { it.per }
-            "pbr" -> if (isAscending) stocks.sortedBy { it.pbr } else stocks.sortedByDescending { it.pbr }
-            else -> if (isAscending) stocks.sortedBy { it.symbol } else stocks.sortedByDescending { it.symbol } // 默认按 symbol 排序
+            "name" -> if (isAscending) equitys.sortedBy { it.name } else equitys.sortedByDescending { it.name }
+            "sector" -> if (isAscending) equitys.sortedBy { it.sector } else equitys.sortedByDescending { it.sector }
+            "dividendYield" -> if (isAscending) equitys.sortedBy { it.dividendYield } else equitys.sortedByDescending { it.dividendYield }
+            "debtAssetRatio" -> if (isAscending) equitys.sortedBy { it.debtAssetRatio } else equitys.sortedByDescending { it.debtAssetRatio }
+            "per" -> if (isAscending) equitys.sortedBy { it.per } else equitys.sortedByDescending { it.per }
+            "pbr" -> if (isAscending) equitys.sortedBy { it.pbr } else equitys.sortedByDescending { it.pbr }
+            else -> if (isAscending) equitys.sortedBy { it.symbol } else equitys.sortedByDescending { it.symbol } // 默认按 symbol 排序
         }
         sortedList.toMutableStateList()
     }*/
 
     val isAscending by viewModel.isAscendingFlow.collectAsState()
     val sortColumn by viewModel.sortColumnFlow.collectAsState()
-    val sortedStocks by viewModel.stockListFlow.collectAsState()
+    val sortedEquitys by viewModel.equityListFlow.collectAsState()
 
     LaunchedEffect(sortColumn, isAscending,position) {
-        viewModel.sortStockInfo(sortColumn, isAscending)
+        viewModel.sortEquityInfo(sortColumn, isAscending)
         lazyListState.scrollToItem(position)
     }
 
@@ -238,6 +240,7 @@ fun StockList(
         }
 
 
+
         // 显示股票列表 LazyColumn  itemsIndexed LazyVerticalGrid
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -245,26 +248,36 @@ fun StockList(
             horizontalAlignment = Alignment.CenterHorizontally,
             state = lazyListState
         ) {
-            itemsIndexed(sortedStocks) {index, item ->
+            itemsIndexed(sortedEquitys) {index, item ->
+                var isExpanded by remember {
+                    mutableStateOf(false )
+                }
+                val surfaceColor: Color by animateColorAsState(
+                    if(isExpanded) Color.Blue else Color.Black
+                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateContentSize()
                         .background(
                             if (index % 2 == 0) Color.White else Color.LightGray
                         )
                         .clickable {
+                            isExpanded = !isExpanded
                             // 在这里处理点击事件
                             onSubmit(item.symbol, item.name)
                         }
                 ) {
                     Text(
                         text = item.symbol,
+                        color = surfaceColor,
                         modifier = Modifier.weight(1.5f),
                         textAlign = TextAlign.Start // 左对齐
                     )
                     Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
                     Text(
                         text = item.name, // 当 name 为 null 时，显示默认值
+                        color = surfaceColor,
 //                        text = item.name?.take(10)?.plus("...") ?: "", // 当 name 为 null 时，显示默认值
                         modifier = Modifier.weight(4f),
                         textAlign = TextAlign.Start // 左对齐
@@ -272,18 +285,21 @@ fun StockList(
                     Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
                     Text(
                         text = item.sector, // 当 name 为 null 时，显示默认值
+                        color = surfaceColor,
                         modifier = Modifier.weight(2f),
                         textAlign = TextAlign.Start // 左对齐
                     )
                     Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
                     Text(
                         text = item.dividendYield?.let { "${String.format("%.2f", it)}%" } ?: "", // 格式化 小数点后显示2位
+                        color = surfaceColor,
                         modifier = Modifier.weight(1.5f),
                         textAlign = TextAlign.End // 右对齐
                     )
                     Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
                     Text(
                         text = item.debtAssetRatio?.let { "${String.format("%.2f", it)}%" }  ?: "", //  添加 %
+                        color = surfaceColor,
                         modifier = Modifier.weight(1.5f),
                         textAlign = TextAlign.End // 右对齐
                     )
@@ -292,6 +308,7 @@ fun StockList(
                         text = item.per?.let {
                             String.format("%.2f", it) // 格式化 小数点后显示2位
                         } ?: "",  // 格式化为两位小数
+                        color = surfaceColor,
                         modifier = Modifier.weight(1.5f),
                         textAlign = TextAlign.End // 右对齐
                     )
@@ -300,9 +317,12 @@ fun StockList(
                         text = item.pbr?.let {
                             String.format("%.2f", it)  // 格式化 小数点后显示2位
                         } ?: "",  // 格式化为两位小数
+                        color = surfaceColor,
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.End // 右对齐
                     )
+
+
                 }
             }
         }
