@@ -18,7 +18,9 @@ data class EquityInfo(
     val dividendYield: Float?,  // 配当利回り
     val debtAssetRatio: Float?,  // 負債比率  (债务权益比率debtEquityRatioから計算)
     val per: Float?,  // 株価収益率
-    val pbr: Float?  // 株価純資産倍率
+    val pbr: Float?,  // 株価純資産倍率
+    val yearChangeRatio: Float?,  // 年初来株価上昇率
+    val movingAverageRatio: Float?,  // 200日移動平均乖離率
 )
 
 @HiltViewModel
@@ -33,11 +35,11 @@ class MainViewModel @Inject constructor(
             name ?: "" ,  //  ?: ""处理 name 为 null 的情况
             sector ?: "" ,
             dividendYield ,
-            debtEquityRatio?.let{
-                it / (it + 100f) * 100f  // 债务权益比率　から計算
-            } ,
+            debtAssetRatio ,
             per ,
-            pbr
+            pbr ,
+            yearChangeRatio ,
+            movingAverageRatio ,
         )
     }
 
@@ -95,17 +97,19 @@ class MainViewModel @Inject constructor(
     fun sortEquityInfo(sortColumn: String, isAscending: Boolean) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            var equitys =  _equityListState.value
-            equitys = when (sortColumn) {
-                "name" -> if (isAscending) equitys.sortedBy { it.name } else equitys.sortedByDescending { it.name }
-                "sector" -> if (isAscending) equitys.sortedBy { it.sector } else equitys.sortedByDescending { it.sector }
-                "dividendYield" -> if (isAscending) equitys.sortedBy { it.dividendYield } else equitys.sortedByDescending { it.dividendYield }
-                "debtAssetRatio" -> if (isAscending) equitys.sortedBy { it.debtAssetRatio } else equitys.sortedByDescending { it.debtAssetRatio }
-                "per" -> if (isAscending) equitys.sortedBy { it.per } else equitys.sortedByDescending { it.per }
-                "pbr" -> if (isAscending) equitys.sortedBy { it.pbr } else equitys.sortedByDescending { it.pbr }
-                else -> if (isAscending) equitys.sortedBy { it.symbol } else equitys.sortedByDescending { it.symbol } // 默认按 symbol 排序
+            var equities =  _equityListState.value
+            equities = when (sortColumn) {
+                "name" -> if (isAscending) equities.sortedBy { it.name } else equities.sortedByDescending { it.name }
+                "sector" -> if (isAscending) equities.sortedBy { it.sector } else equities.sortedByDescending { it.sector }
+                "dividendYield" -> if (isAscending) equities.sortedBy { it.dividendYield } else equities.sortedByDescending { it.dividendYield }
+                "debtAssetRatio" -> if (isAscending) equities.sortedBy { it.debtAssetRatio } else equities.sortedByDescending { it.debtAssetRatio }
+                "per" -> if (isAscending) equities.sortedBy { it.per } else equities.sortedByDescending { it.per }
+                "pbr" -> if (isAscending) equities.sortedBy { it.pbr } else equities.sortedByDescending { it.pbr }
+                "yearChangeRatio" -> if (isAscending) equities.sortedBy { it.yearChangeRatio } else equities.sortedByDescending { it.yearChangeRatio }
+                "movingAverageRatio" -> if (isAscending) equities.sortedBy { it.movingAverageRatio } else equities.sortedByDescending { it.movingAverageRatio }
+                else -> if (isAscending) equities.sortedBy { it.symbol } else equities.sortedByDescending { it.symbol } // 默认按 symbol 排序
             }
-            _equityListState.value = equitys
+            _equityListState.value = equities
         }
     }
 
@@ -117,10 +121,10 @@ class MainViewModel @Inject constructor(
 //    }
 
 
-    fun filterEquitys(any: List<Any>) {
+    fun filterEquities(any: List<Any>) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _equityListState.value = companyRepository.getQueryEquitys(any).first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
+            _equityListState.value = companyRepository.getQueryEquities(any).first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
         }
     }
 
@@ -129,10 +133,10 @@ class MainViewModel @Inject constructor(
     private val _equityState = MutableStateFlow<Equity?>(null)
     val equityFlow: StateFlow<Equity?> = _equityState.asStateFlow()
 
-    fun findEquitys(symbol: String) {
+    fun findEquity(symbol: String) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _equityState.value = companyRepository.getQueryEquitys(symbol).first()  // 使用扩展函数进行转换
+            _equityState.value = companyRepository.findEquity(symbol).first()  // 使用扩展函数进行转换
         }
     }
 

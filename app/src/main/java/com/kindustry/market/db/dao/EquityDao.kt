@@ -12,6 +12,7 @@ interface EquityDao {
     @RawQuery(observedEntities = [Equity::class])
     fun getEquityList(query: SupportSQLiteQuery): Flow<List<Equity>>
 
+    // Select Annotation
     @Query("""
     SELECT * 
     FROM equity_statistics
@@ -28,12 +29,11 @@ interface EquityDao {
     @Query("SELECT '' UNION ALL SELECT distinct sector FROM equity_statistics ORDER BY 1 ASC")
     fun getAllSector(): Flow<List<String>>
 
-    @Query("SELECT * FROM equity_statistics ORDER BY RANDOM() Limit 50")
+    @Query("SELECT * FROM equity_statistics WHERE delisting_date is NULL ORDER BY RANDOM() Limit 50")
     fun getRandomEquity(): Flow<List<Equity>>
 
-    // Select Annotation
-    @Query("SELECT * FROM equity_statistics WHERE symbol=:noteID")
-    fun selectNoteID(noteID: String): Flow<Equity>
+    @Query("SELECT * FROM equity_statistics WHERE symbol=:symbol")
+    fun getEquityBySymbol(symbol: String): Flow<Equity>
 
     // Insert Notes
     @Insert(onConflict = OnConflictStrategy.REPLACE)

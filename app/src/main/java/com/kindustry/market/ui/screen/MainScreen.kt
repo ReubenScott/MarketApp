@@ -13,6 +13,7 @@ import com.kindustry.market.component.EquityIndicator
 import com.kindustry.market.ui.component.EquityBasicInfo
 import com.kindustry.market.ui.component.MyFavorite
 import com.kindustry.market.ui.component.EquityList
+import com.kindustry.market.ui.component.ScrollableTable
 import com.kindustry.market.ui.component.SideDrawer
 import com.kindustry.market.viewmodel.MainViewModel
 
@@ -26,7 +27,7 @@ fun MainScreen(
     mainViewModel: MainViewModel,
     onListClick: (List<Any>) -> Unit,
     onPreviewClick: (String) -> Unit,
-    onChartClick: (String, String) -> Unit,
+//    onChartClick: (String, String) -> Unit,
     onInfoClick: (String) -> Unit,
     onFavoriteClick: () -> Unit
 ){
@@ -42,7 +43,7 @@ fun MainScreen(
     val sectorList = mainViewModel.allSectorFlow.collectAsState(initial = emptyList()).value
 
     // 订阅 equitysFlow 并更新 equitys 列表
-    val equitys by mainViewModel.equityListFlow.collectAsState()
+    val equities by mainViewModel.equityListFlow.collectAsState()
     val equity by mainViewModel.equityFlow.collectAsState()
 
     Scaffold (
@@ -120,7 +121,10 @@ fun MainScreen(
                 )
                 BottomNavigationItem(
                     selected = true,
-                    onClick =  { onChartClick("","") }  , //  TODO
+                    onClick =  {
+//                        onChartClick("","")  //  TODO
+                        screenState.value = ScreenState.C
+                     } ,
                     icon = { Icon(Icons.Default.BarChart, contentDescription = "BarChart") },
                     label = { Text(text = "Chart") }
                 )
@@ -159,9 +163,14 @@ fun MainScreen(
                     }
                 )
                 ScreenState.B -> EquityIndicator(equity)
-                ScreenState.C -> MyFavorite(equitys)
+                ScreenState.C -> MyFavorite(equities) // ScrollableGridTable(mainViewModel)
                 ScreenState.D -> EquityBasicInfo(equity)
-                ScreenState.E -> MyFavorite(equitys)
+                ScreenState.E -> ScrollableTable(mainViewModel,
+                    { firstParam:String, secondParam:String ->
+                        symbol = firstParam
+                        name = secondParam
+                    }
+                )  //  MyFavorite(equitys)
             }
         }
 
