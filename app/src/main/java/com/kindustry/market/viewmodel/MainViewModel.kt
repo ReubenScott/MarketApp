@@ -124,7 +124,7 @@ class MainViewModel @Inject constructor(
     fun filterEquities(any: List<Any>) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _equityListState.value = companyRepository.getQueryEquities(any).first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
+            _equityListState.value = companyRepository.filterEquities(any).first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
         }
     }
 

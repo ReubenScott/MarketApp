@@ -18,6 +18,7 @@ import com.kindustry.market.ui.component.SearchDialog
 import com.kindustry.market.ui.component.SideDrawer
 import com.kindustry.market.viewmodel.MainViewModel
 
+// 创建一个提供 PaddingValues 的父组件，然后所有子组件都可以使用 LocalPaddingValues.current 访问这些内边距
 val LocalPaddingValues = staticCompositionLocalOf<PaddingValues> { error("No PaddingValues provided") }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -71,6 +72,15 @@ fun MainScreen(
                 }
             )
 
+            if (showSearchDialog) {
+                SearchDialog {
+                    if (it.trim() != "") {
+                        onSearchClick(it.trim())
+                    }
+                    showSearchDialog = false
+                }
+            }
+
             // TODO
             if (showFilterDialog) {
                 Dialog(
@@ -80,26 +90,18 @@ fun MainScreen(
                         SideDrawer(
                             exchangeList,
                             sectorList
-                        ) { firstParam: String, secondParam: String ->
+                        ) { data: List<Any> ->
                             showFilterDialog = false
-                            onListClick(listOf(firstParam, secondParam))
                             screenState.value = ScreenState.A
-                            symbol = ""
-                            name = ""
+                            // Handle the case where the list is empty
+                            if (data.isNotEmpty()) {
+                                onListClick(data)
+                                symbol = ""
+                                name = ""
+                            }
                         }
-//                        DropdownMenuExample()
-//                        DropdownMenuWithDescription()
                     }
                 )
-            }
-
-            if (showSearchDialog) {
-                SearchDialog {
-                    if (it.trim() != "") {
-                        onSearchClick(it.trim())
-                    }
-                    showSearchDialog = false
-                }
             }
 
         },
@@ -160,21 +162,20 @@ fun MainScreen(
             when (screenState.value) {
                 ScreenState.A -> EquityList(
 //                    equitys = equitys ,
-                    viewModel = mainViewModel ,
-                    { firstParam:String, secondParam:String ->
-                        symbol = firstParam
-                        name = secondParam
-                    }
-                )
+                    viewModel = mainViewModel
+                ) { firstParam: String, secondParam: String ->
+                    symbol = firstParam
+                    name = secondParam
+                }
+
                 ScreenState.B -> EquityIndicator(equity)
                 ScreenState.C -> MyFavorite(equities) // ScrollableGridTable(mainViewModel)
                 ScreenState.D -> EquityBasicInfo(equity)
-                ScreenState.E -> ScrollableTable(mainViewModel,
-                    { firstParam:String, secondParam:String ->
-                        symbol = firstParam
-                        name = secondParam
-                    }
-                )  //  MyFavorite(equitys)
+                ScreenState.E -> ScrollableTable(mainViewModel
+                ) { firstParam: String, secondParam: String ->
+                    symbol = firstParam
+                    name = secondParam
+                }  //  MyFavorite(equitys)
             }
         }
 

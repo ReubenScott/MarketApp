@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
 //                                equitys = mainViewModel.equitysFlow.collectAsState(initial = emptyList()).value,
                                 mainViewModel = mainViewModel,
                                 onSearchClick = { codeOrName:String -> mainViewModel.findEquityBySymbolOrName(codeOrName) },
-                                onListClick = { any: List<Any> -> mainViewModel.filterEquities(any) },
+                                onListClick = { data: List<Any> -> mainViewModel.filterEquities(data) },
                                 onPreviewClick = { symbol:String -> mainViewModel.findEquityBySymbol(symbol) },
 //                                onChartClick = { /* firstParam:String, secondParam:String -> mainViewModel.filterEquities(listOf(firstParam, secondParam)) */ },
                                 onInfoClick = { symbol:String -> mainViewModel.findEquityBySymbol(symbol)},

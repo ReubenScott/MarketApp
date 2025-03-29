@@ -18,12 +18,17 @@ class CompanyRepository @Inject constructor(
 
     fun findEquityBySymbolOrName(codeOrName: String): Flow<List<Equity>>  = equityDao.findEquityBySymbolOrName(codeOrName)
 
-//    fun getQueryEquitys(exchange: String?, sector: String?): Flow<List<Equity>> {
-    fun getQueryEquities(any: List<Any>): Flow<List<Equity>> {
+    fun filterEquities(any: List<Any>): Flow<List<Equity>> {
 
         // exchange: String?, sector: String?
         val exchange = any.getOrNull(0) as? String // 安全转换为 String
         val sector = any.getOrNull(1) as? String // 安全转换为 String
+        val yearChangeRange = any.getOrNull(2) as? String // 上昇率
+        val movingAverageRange = any.getOrNull(3) as? String // 乖離率
+        val debtAssetRange = any.getOrNull(4) as? String // 負債率
+        val perRange = any.getOrNull(5) as? String // PER
+        val pbrRange = any.getOrNull(6) as? String // PBR
+        val dividendYieldRange = any.getOrNull(7) as? String // 股息
 
         val parameters = mutableListOf<Any?>() // 创建一个可变列表来存储参数
 
@@ -39,9 +44,64 @@ class CompanyRepository @Inject constructor(
             parameters.add(sector) // 将参数添加到列表中
         }
 
+        // 年初来株価上昇率
+        addQueryRangeCondition("year_change_ratio", yearChangeRange, queryBuilder , parameters)
+
+        // 200日移動平均乖離率
+        addQueryRangeCondition("(present_price - moving_average)*100 /moving_average", movingAverageRange, queryBuilder , parameters)
+
+        // 負債比率 debtEquityRatio から計算
+        addQueryRangeCondition("IFNULL(debt_equity_ratio/(debt_equity_ratio + 100), 0)", debtAssetRange, queryBuilder , parameters)
+
+        // PER 株価収益率
+        addQueryRangeCondition("per", perRange, queryBuilder , parameters)
+
+        // PBR 株価純資産倍率
+        addQueryRangeCondition("pbr", pbrRange, queryBuilder , parameters)
+
+        // 股息
+        addQueryRangeCondition("dividend_yield", dividendYieldRange, queryBuilder , parameters)
+
+        /*
+         if (debtAssetRange?.isBlank() == false) {
+            val range = debtAssetRange.split(",").map { it }
+            val min = range.getOrNull(0)
+            val max = range.getOrNull(1)
+
+            if (min?.isNotBlank() == true) {
+                queryBuilder.append(" AND IFNULL(debt_equity_ratio/(debt_equity_ratio + 100), 0) > :min")
+                parameters.add(min.toFloat())
+            }
+
+            if (max?.isNotBlank() == true) {
+                queryBuilder.append(" AND IFNULL(debt_equity_ratio/(debt_equity_ratio + 100), 0) <= :max")
+                parameters.add(max.toFloat())
+            }
+
+        }*/
+
         queryBuilder.append(" AND delisting_date is NULL")  // 上場廃止日
 
         return equityDao.getEquityList(SimpleSQLiteQuery(queryBuilder.toString(), parameters.toTypedArray()))
+    }
+
+
+    private fun addQueryRangeCondition(conditionColumn: String?, conditionRange: String?, queryBuilder: StringBuilder, parameters: MutableList<Any?>) {
+        if (conditionRange?.isBlank() == false) {
+            val range = conditionRange.split(",").map { it }
+            val min = range.getOrNull(0)
+            val max = range.getOrNull(1)
+
+            if (min?.isNotBlank() == true) {
+                queryBuilder.append(" AND $conditionColumn > ?")
+                parameters.add(min.toFloat())
+            }
+
+            if (max?.isNotBlank() == true) {
+                queryBuilder.append(" AND $conditionColumn <= ?")
+                parameters.add(max.toFloat())
+            }
+        }
     }
 
 }
