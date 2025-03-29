@@ -14,7 +14,9 @@ class CompanyRepository @Inject constructor(
     val allSector: Flow<List<String>> = equityDao.getAllSector()
 
     val randomEquitys: Flow<List<Equity>> = equityDao.getRandomEquity()
-    fun findEquity(symbol: String): Flow<Equity> = equityDao.getEquityBySymbol(symbol)
+    fun findEquityBySymbol(symbol: String): Flow<Equity> = equityDao.getEquityBySymbol(symbol)
+
+    fun findEquityBySymbolOrName(codeOrName: String): Flow<List<Equity>>  = equityDao.findEquityBySymbolOrName(codeOrName)
 
 //    fun getQueryEquitys(exchange: String?, sector: String?): Flow<List<Equity>> {
     fun getQueryEquities(any: List<Any>): Flow<List<Equity>> {

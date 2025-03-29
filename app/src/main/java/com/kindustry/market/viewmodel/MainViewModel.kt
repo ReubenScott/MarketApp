@@ -128,15 +128,21 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun findEquityBySymbolOrName(codeOrName: String) {
+        // 启动一个协程（Coroutine）
+        viewModelScope.launch {
+            _equityListState.value = companyRepository.findEquityBySymbolOrName(codeOrName).first().map{ it.toEquityInfo() } // 使用扩展函数进行转换
+        }
+    }
 
     //  Equity Flow
     private val _equityState = MutableStateFlow<Equity?>(null)
     val equityFlow: StateFlow<Equity?> = _equityState.asStateFlow()
 
-    fun findEquity(symbol: String) {
+    fun findEquityBySymbol(symbol: String) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _equityState.value = companyRepository.findEquity(symbol).first()  // 使用扩展函数进行转换
+            _equityState.value = companyRepository.findEquityBySymbol(symbol).first()  // 使用扩展函数进行转换
         }
     }
 

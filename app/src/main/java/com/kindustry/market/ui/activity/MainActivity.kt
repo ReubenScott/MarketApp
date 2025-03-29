@@ -53,10 +53,11 @@ class MainActivity : ComponentActivity() {
                                 navController ,// 将 NavController 传递给 MainPage
 //                                equitys = mainViewModel.equitysFlow.collectAsState(initial = emptyList()).value,
                                 mainViewModel = mainViewModel,
+                                onSearchClick = { codeOrName:String -> mainViewModel.findEquityBySymbolOrName(codeOrName) },
                                 onListClick = { any: List<Any> -> mainViewModel.filterEquities(any) },
-                                onPreviewClick = { symbol:String -> mainViewModel.findEquity(symbol) },
+                                onPreviewClick = { symbol:String -> mainViewModel.findEquityBySymbol(symbol) },
 //                                onChartClick = { /* firstParam:String, secondParam:String -> mainViewModel.filterEquities(listOf(firstParam, secondParam)) */ },
-                                onInfoClick = { symbol:String -> mainViewModel.findEquity(symbol)},
+                                onInfoClick = { symbol:String -> mainViewModel.findEquityBySymbol(symbol)},
                                 onFavoriteClick = { mainViewModel.randomGet()}
                             )
                         }

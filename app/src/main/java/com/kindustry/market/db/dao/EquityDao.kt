@@ -18,7 +18,6 @@ interface EquityDao {
     FROM equity_statistics
     WHERE exchange =:exchange and sector =:sector  Limit 40
     """)
-//    suspend fun getEquityListings(query: String) : List<Equity>
     fun getEquityListings(exchange: String?, sector: String?) : Flow<List<Equity>>
 
     // 市場区分
@@ -34,6 +33,9 @@ interface EquityDao {
 
     @Query("SELECT * FROM equity_statistics WHERE symbol=:symbol")
     fun getEquityBySymbol(symbol: String): Flow<Equity>
+
+    @Query("SELECT * FROM equity_statistics WHERE symbol LIKE '%' || :codeOrName || '%' OR name LIKE '%' || :codeOrName || '%'")
+    fun findEquityBySymbolOrName(codeOrName: String) : Flow<List<Equity>>
 
     // Insert Notes
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -43,11 +43,11 @@ fun EquityIndicator(equity: Equity?){
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     IndicatorItem("年初来株価上昇率", equity?.yearChangeRatio, "%")
-                    IndicatorItem("200日移動平均乖離率", equity?.movingAverageRatio, "%")
+                    IndicatorItem("移動平均乖離率", equity?.movingAverageRatio, "%")
                     IndicatorItem("現在株価", equity?.presentPrice)
                     IndicatorItem("年初来安値", equity?.yearLow)
                     IndicatorItem("年初来高値", equity?.yearHigh)
-                    IndicatorItem("200日移動平均線", equity?.movingAverage)
+                    IndicatorItem("移動平均線", equity?.movingAverage)
                     IndicatorItem("1株純資産", equity?.bookValuePerShare)
                     IndicatorItem("出来高", equity?.volume)
                     IndicatorItem("売買回転率", equity?.turnoverRate, "‰")

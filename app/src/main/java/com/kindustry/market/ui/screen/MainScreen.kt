@@ -14,6 +14,7 @@ import com.kindustry.market.ui.component.EquityBasicInfo
 import com.kindustry.market.ui.component.MyFavorite
 import com.kindustry.market.ui.component.EquityList
 import com.kindustry.market.ui.component.ScrollableTable
+import com.kindustry.market.ui.component.SearchDialog
 import com.kindustry.market.ui.component.SideDrawer
 import com.kindustry.market.viewmodel.MainViewModel
 
@@ -25,6 +26,7 @@ fun MainScreen(
     navController: NavController,
     reopened: String = "false",
     mainViewModel: MainViewModel,
+    onSearchClick: (String) -> Unit,
     onListClick: (List<Any>) -> Unit,
     onPreviewClick: (String) -> Unit,
 //    onChartClick: (String, String) -> Unit,
@@ -32,7 +34,8 @@ fun MainScreen(
     onFavoriteClick: () -> Unit
 ){
     // 使用 remember 保存状态
-    var showDialog by remember { mutableStateOf(false) }
+    var showFilterDialog by remember { mutableStateOf(false) }
+    var showSearchDialog by remember { mutableStateOf(false) }
     val screenState = remember { mutableStateOf(ScreenState.A) }
 
     var symbol by remember { mutableStateOf("") }
@@ -54,50 +57,51 @@ fun MainScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { /* 处理菜单点击事件 */
-                        showDialog = true
+                        showFilterDialog = true
                     }) {
                         Icon(imageVector = Icons.Filled.FilterList, contentDescription = "FilterList")
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        showSearchDialog = true
+                    }) {
                         Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
                     }
                 }
             )
 
             // TODO
-            if (showDialog) {
-//                AlertDialog(
-//                    onDismissRequest = { showDialog = false },
-//                    title = { Text(text = "这是一个浮动窗口") },
-//                    text = { Text(text = "你可以在这里显示一些内容") },
-//                    confirmButton = {
-//                        Button(onClick = { showDialog = false }) {
-//                            Text(text = "确定")
-//                        }
-//                    }
-//                )
+            if (showFilterDialog) {
                 Dialog(
-                    onDismissRequest = { showDialog = false },
+                    onDismissRequest = { showFilterDialog = false },
                     properties = DialogProperties(usePlatformDefaultWidth = false), // 禁用平台默认宽度
                     content = {
                         SideDrawer(
                             exchangeList,
-                            sectorList,
-                            { firstParam:String, secondParam:String ->
-                                showDialog = false
-                                onListClick( listOf(firstParam, secondParam) )
-                                screenState.value = ScreenState.A
-                                symbol = ""
-                                name = ""
-                            }
-                        )
+                            sectorList
+                        ) { firstParam: String, secondParam: String ->
+                            showFilterDialog = false
+                            onListClick(listOf(firstParam, secondParam))
+                            screenState.value = ScreenState.A
+                            symbol = ""
+                            name = ""
+                        }
 //                        DropdownMenuExample()
 //                        DropdownMenuWithDescription()
                     }
                 )
             }
+
+            if (showSearchDialog) {
+                SearchDialog {
+                    if (it.trim() != "") {
+                        onSearchClick(it.trim())
+                    }
+                    showSearchDialog = false
+                }
+            }
+
         },
         bottomBar = {  // 底部菜单项
             BottomNavigation {
