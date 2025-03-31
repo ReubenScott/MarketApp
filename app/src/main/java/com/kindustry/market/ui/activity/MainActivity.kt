@@ -1,6 +1,11 @@
 package com.kindustry.market.ui.activity
 
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -8,15 +13,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-
-import com.kindustry.market.ui.screen.MainScreen
+import androidx.navigation.compose.rememberNavController
 import com.kindustry.market.ui.screen.LoginScreen
+import com.kindustry.market.ui.screen.MainScreen
 import com.kindustry.market.ui.theme.MarketTheme
 import com.kindustry.market.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -25,6 +30,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        requestPermission(this) // 使用 Activity 的 Context
 
         //让内容，显示在状态栏和系统导航栏后面：状态栏和导航栏会遮盖部分内容
 //        WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -75,16 +82,16 @@ class MainActivity : ComponentActivity() {
 
         }
     }
-
 }
 
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    MarketTheme {
-//        MessageCard(EquityInfo(symbol = "Android", name = "Jectpack"))
-//    }
-//}
+//获取外部存储管理权限
+private fun requestPermission(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+        !Environment.isExternalStorageManager()
+    ) {
+        val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+}
 

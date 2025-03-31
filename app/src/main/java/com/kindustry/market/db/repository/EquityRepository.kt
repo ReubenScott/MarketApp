@@ -20,7 +20,6 @@ class CompanyRepository @Inject constructor(
 
     fun filterEquities(any: List<Any>): Flow<List<Equity>> {
 
-        // exchange: String?, sector: String?
         val exchange = any.getOrNull(0) as? String // 安全转换为 String
         val sector = any.getOrNull(1) as? String // 安全转换为 String
         val yearChangeRange = any.getOrNull(2) as? String // 上昇率
@@ -61,24 +60,6 @@ class CompanyRepository @Inject constructor(
 
         // 股息
         addQueryRangeCondition("dividend_yield", dividendYieldRange, queryBuilder , parameters)
-
-        /*
-         if (debtAssetRange?.isBlank() == false) {
-            val range = debtAssetRange.split(",").map { it }
-            val min = range.getOrNull(0)
-            val max = range.getOrNull(1)
-
-            if (min?.isNotBlank() == true) {
-                queryBuilder.append(" AND IFNULL(debt_equity_ratio/(debt_equity_ratio + 100), 0) > :min")
-                parameters.add(min.toFloat())
-            }
-
-            if (max?.isNotBlank() == true) {
-                queryBuilder.append(" AND IFNULL(debt_equity_ratio/(debt_equity_ratio + 100), 0) <= :max")
-                parameters.add(max.toFloat())
-            }
-
-        }*/
 
         queryBuilder.append(" AND delisting_date is NULL")  // 上場廃止日
 
