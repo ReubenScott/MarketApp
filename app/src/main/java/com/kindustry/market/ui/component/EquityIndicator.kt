@@ -31,7 +31,7 @@ fun EquityIndicator(equity: Equity?){
             Row(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(1f)) {
                     IndicatorItem("市場区分", equity?.exchange)
-                    IndicatorItem("上場日", equity?.ListingDate)
+                    IndicatorItem("上場日", equity?.listingDate)
                     IndicatorItem("日経業種分類", equity?.industry)
                     IndicatorItem("東証業種名", equity?.sector)
                     IndicatorItem("株価収益率", equity?.per, "倍")

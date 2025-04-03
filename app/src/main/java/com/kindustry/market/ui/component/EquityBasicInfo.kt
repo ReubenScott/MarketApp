@@ -34,7 +34,7 @@ fun EquityBasicInfo(
         InfoRow("本社住所", equity?.address ?: "")
         InfoRow("電話番号", equity?.tel ?: "")
         InfoRow("上場市場", equity?.exchange ?: "")
-        InfoRow("上場年月日", equity?.ListingDate ?: "")
+        InfoRow("上場年月日", equity?.listingDate ?: "")
         InfoRow("単元株数", equity?.perUnit ?: "")
         InfoRow("事業内容", equity?.businessScope ?: "")
         InfoRow("取扱い商品", equity?.productRange ?: "")

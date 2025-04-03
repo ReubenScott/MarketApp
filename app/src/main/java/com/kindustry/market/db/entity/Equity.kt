@@ -25,7 +25,7 @@ data class Equity(
     val establishedDate        :  String?,      // 設立日
 
     @ColumnInfo(name = "listing_date")
-    val ListingDate            :  String?,      // 上場日
+    val listingDate            :  String?,      // 上場日
 
     @ColumnInfo(name = "sector")
     val sector                  :  String?,      // 東証業種名 業種

@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kindustry.market.ui.screen.LocalPaddingValues
 import com.kindustry.market.viewmodel.MainViewModel
@@ -67,31 +68,37 @@ fun EquityList (
     val headerMap: Map<String, String> = linkedMapOf(
         "コード" to "symbol",
         "銘柄名" to "name",
+        "市場区分" to "exchange",
+        "上場日" to "listingDate",
         "業種" to "sector",
         "上昇率" to "yearChangeRatio",
         "乖離率" to "movingAverageRatio",
         "負債率" to "debtAssetRatio",
         "PER" to "per",
         "PBR" to "pbr",
-        "股息" to "dividendYield"
+        "股息" to "dividendYield",
+        "時価総額" to "marketCap"
     )
 
     val headerList: List<String> = headerMap.keys.toList()
 //    val headerList = listOf("コード", "銘柄名", "業種","股息", "負債率", "PER", "PBR", "上昇率", "乖離率")
-    val weightList = listOf(80, 150, 120, 80, 80, 80, 80, 80, 80)
+    val weightList = listOf(80, 150, 130, 90, 150, 80, 80, 80, 80, 80, 80, 100)
 
 //  text = item.name?.take(10)?.plus("...") ?: "", // 当 name 为 null 时，显示默认值
     val dataList =  sortedEquities.map { it ->
         listOf(
             it.symbol,
             it.name,
+            it.exchange,
+            it.listingDate,
             it.sector,
             it.yearChangeRatio?.let { "${String.format("%.2f", it)}%" },
             it.movingAverageRatio?.let { "${String.format("%.2f", it)}%" },
             it.debtAssetRatio?.let { "${String.format("%.2f", it)}%" },
             it.per?.let { String.format("%.2f", it) },
             it.pbr?.let { String.format("%.2f", it) },
-            it.dividendYield?.let { "${String.format("%.2f", it)}%" }
+            it.dividendYield?.let { "${String.format("%.2f", it)}%" },
+            it.marketCap?.let { "${String.format("%.1f", it)}億" }
         )
     }
 
@@ -178,7 +185,9 @@ fun EquityList (
                                     TextAlign.End // 右对齐
                                 } else {
                                     TextAlign.Start // 左对齐
-                                }
+                                },
+                                maxLines = 1, // 设置最大行数为 1，即不换行
+                                overflow = TextOverflow.Ellipsis // 设置文本溢出时的处理方式为省略号
                             )
 
                             if (columnIndex < row.size - 1) {

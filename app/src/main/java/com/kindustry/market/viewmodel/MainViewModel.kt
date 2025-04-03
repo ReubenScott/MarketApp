@@ -14,6 +14,8 @@ import javax.inject.Inject
 data class EquityInfo(
     val symbol: String,  // コード
     val name: String,    // 銘柄名
+    val exchange: String,  // 市場区分
+    val listingDate: String,  // 上場日
     val sector: String,  // 東証業種名
     val dividendYield: Float?,  // 配当利回り
     val debtAssetRatio: Float?,  // 負債比率  (债务权益比率debtEquityRatioから計算)
@@ -21,6 +23,7 @@ data class EquityInfo(
     val pbr: Float?,  // 株価純資産倍率
     val yearChangeRatio: Float?,  // 年初来株価上昇率
     val movingAverageRatio: Float?,  // 200日移動平均乖離率
+    val marketCap: Float?,  // 時価総額 億円
 )
 
 @HiltViewModel
@@ -29,10 +32,12 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     // 扩展函数，方便转换
-    fun Equity.toEquityInfo(): EquityInfo {
+    private fun Equity.toEquityInfo(): EquityInfo {
         return EquityInfo(
             symbol ,
             name ?: "" ,  //  ?: ""处理 name 为 null 的情况
+            exchange ?: "" ,
+            listingDate ?: "" ,
             sector ?: "" ,
             dividendYield ,
             debtAssetRatio ,
@@ -40,6 +45,7 @@ class MainViewModel @Inject constructor(
             pbr ,
             yearChangeRatio ,
             movingAverageRatio ,
+            marketCap ,
         )
     }
 
@@ -59,8 +65,8 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             companyRepository.randomEquitys
                 .map { equityList ->
-                    val EquityInfo = equityList.firstOrNull()?.toEquityInfo()
-                    if (EquityInfo != null) listOf(EquityInfo) else emptyList() // Create a list
+                    val equityItem = equityList.firstOrNull()?.toEquityInfo()
+                    if (equityItem != null) listOf(equityItem) else emptyList() // Create a list
                 }
                 .collect { EquityInfoList  ->
                     _equityListState.value = EquityInfoList
@@ -100,13 +106,16 @@ class MainViewModel @Inject constructor(
             var equities =  _equityListState.value
             equities = when (sortColumn) {
                 "name" -> if (isAscending) equities.sortedBy { it.name } else equities.sortedByDescending { it.name }
+                "exchange" -> if (isAscending) equities.sortedBy { it.exchange } else equities.sortedByDescending { it.exchange }
+                "listingDate" -> if (isAscending) equities.sortedBy { it.listingDate } else equities.sortedByDescending { it.listingDate }
                 "sector" -> if (isAscending) equities.sortedBy { it.sector } else equities.sortedByDescending { it.sector }
-                "dividendYield" -> if (isAscending) equities.sortedBy { it.dividendYield } else equities.sortedByDescending { it.dividendYield }
+                "yearChangeRatio" -> if (isAscending) equities.sortedBy { it.yearChangeRatio } else equities.sortedByDescending { it.yearChangeRatio }
+                "movingAverageRatio" -> if (isAscending) equities.sortedBy { it.movingAverageRatio } else equities.sortedByDescending { it.movingAverageRatio }
                 "debtAssetRatio" -> if (isAscending) equities.sortedBy { it.debtAssetRatio } else equities.sortedByDescending { it.debtAssetRatio }
                 "per" -> if (isAscending) equities.sortedBy { it.per } else equities.sortedByDescending { it.per }
                 "pbr" -> if (isAscending) equities.sortedBy { it.pbr } else equities.sortedByDescending { it.pbr }
-                "yearChangeRatio" -> if (isAscending) equities.sortedBy { it.yearChangeRatio } else equities.sortedByDescending { it.yearChangeRatio }
-                "movingAverageRatio" -> if (isAscending) equities.sortedBy { it.movingAverageRatio } else equities.sortedByDescending { it.movingAverageRatio }
+                "dividendYield" -> if (isAscending) equities.sortedBy { it.dividendYield } else equities.sortedByDescending { it.dividendYield }
+                "marketCap" -> if (isAscending) equities.sortedBy { it.marketCap } else equities.sortedByDescending { it.marketCap }
                 else -> if (isAscending) equities.sortedBy { it.symbol } else equities.sortedByDescending { it.symbol } // 默认按 symbol 排序
             }
             _equityListState.value = equities
