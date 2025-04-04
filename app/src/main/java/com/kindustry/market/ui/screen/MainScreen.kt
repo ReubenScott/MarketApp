@@ -11,11 +11,11 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.kindustry.market.component.EquityIndicator
 import com.kindustry.market.ui.component.EquityBasicInfo
-import com.kindustry.market.ui.component.MyFavorite
 import com.kindustry.market.ui.component.EquityList
 import com.kindustry.market.ui.component.ScrollableTable
 import com.kindustry.market.ui.component.SearchDialog
 import com.kindustry.market.ui.component.SideDrawer
+import com.kindustry.market.ui.component.WebViewChart
 import com.kindustry.market.viewmodel.MainViewModel
 
 // 创建一个提供 PaddingValues 的父组件，然后所有子组件都可以使用 LocalPaddingValues.current 访问这些内边距
@@ -76,6 +76,7 @@ fun MainScreen(
                 SearchDialog {
                     if (it.trim() != "") {
                         onSearchClick(it.trim())
+                        screenState.value = ScreenState.A
                     }
                     showSearchDialog = false
                 }
@@ -169,9 +170,9 @@ fun MainScreen(
                 }
 
                 ScreenState.B -> EquityIndicator(equity)
-                ScreenState.C -> MyFavorite(equities) // ScrollableGridTable(mainViewModel)
+                ScreenState.C ->  WebViewChart(symbol)
                 ScreenState.D -> EquityBasicInfo(equity)
-                ScreenState.E -> ScrollableTable(mainViewModel
+                ScreenState.E -> ScrollableTable(mainViewModel  // MyFavorite(equities)
                 ) { firstParam: String, secondParam: String ->
                     symbol = firstParam
                     name = secondParam
