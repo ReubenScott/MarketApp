@@ -20,20 +20,19 @@ import androidx.compose.ui.layout.onGloballyPositioned
 
 @Composable
 fun SideDrawer(
-//    onDismissRequest: () -> Unit,
     exchanges: List<String>,
     sectors: List<String>,
-//    onSubmit: (String, String) -> Unit
+    queryCondition: List<Any>,
     onSubmit: (List<Any>) -> Unit
 ) {
-    var exchange by remember { mutableStateOf("") }
-    var sector by remember { mutableStateOf("") }
-    var yearChangeRange by remember { mutableStateOf("") }
-    var movingAverageRange by remember { mutableStateOf("") }
-    var debtAssetRange by remember { mutableStateOf("") }
-    var perRange by remember { mutableStateOf("") }
-    var pbrRange by remember { mutableStateOf("") }
-    var dividendYieldRange by remember { mutableStateOf("") }
+    var exchange by remember { mutableStateOf(queryCondition.getOrNull(0) ?: "") }
+    var sector by remember { mutableStateOf(queryCondition.getOrNull(1) ?: "") }
+    var yearChangeRange by remember { mutableStateOf(queryCondition.getOrNull(2) ?: "") }
+    var movingAverageRange by remember { mutableStateOf(queryCondition.getOrNull(3) ?: "") }
+    var debtAssetRange by remember { mutableStateOf(queryCondition.getOrNull(4) ?: "") }
+    var perRange by remember { mutableStateOf(queryCondition.getOrNull(5) ?: "") }
+    var pbrRange by remember { mutableStateOf(queryCondition.getOrNull(6) ?: "") }
+    var dividendYieldRange by remember { mutableStateOf(queryCondition.getOrNull(7) ?: "") }
 
     var isBoxVisible by remember { mutableStateOf(true) }
     var boxBounds by remember { mutableStateOf(Rect.Zero) }
@@ -84,6 +83,9 @@ fun SideDrawer(
                         items = exchanges,
                         onSelectionChanged = {
                             exchange = exchanges[it]
+                        },
+                        defaultIndex = run {
+                             exchanges.indexOf(exchange).takeIf { it != -1 } ?: 0
                         }
                     )
 
@@ -92,6 +94,9 @@ fun SideDrawer(
                         items = sectors,
                         onSelectionChanged = {
                             sector = sectors[it]
+                        },
+                        defaultIndex = run {
+                            sectors.indexOf(sector).takeIf { it != -1 } ?: 0
                         }
                     )
 
@@ -111,6 +116,9 @@ fun SideDrawer(
                         items = yearChangeItems.map{ it.title },
                         onSelectionChanged = {  i ->
                             yearChangeRange = yearChangeItems.map{it.key}[i]
+                        },
+                        defaultIndex = run {
+                            yearChangeItems.indexOfFirst { it.key == yearChangeRange }.takeIf { it != -1 } ?: 0
                         }
                     )
 
@@ -130,37 +138,47 @@ fun SideDrawer(
                         items = movingAverageItems.map{ it.title },
                         onSelectionChanged = {  i ->
                             movingAverageRange = movingAverageItems.map{it.key}[i]
+                        },
+                        defaultIndex = run {
+                            movingAverageItems.indexOfFirst { it.key == movingAverageRange }.takeIf { it != -1 } ?: 0
                         }
                     )
 
                     //  負債比率
                     val debtAssetItems = listOf(
                         DropMenuItemData("", ""),
-                        DropMenuItemData(",0.5", "0%～50%"),
-                        DropMenuItemData("0.5,0.8", "50%～80%"),
-                        DropMenuItemData("0.8", "80%～"),
+                        DropMenuItemData(",0.3", "Low (0%～30%)"),
+                        DropMenuItemData("0.3,0.6", "Medium (30%～60%)"),
+                        DropMenuItemData("0.6,0.9", "High (60%～90%)"),
+                        DropMenuItemData("0.9,", "Very High (90%～)"),
                     )
                     DropdownMenuWithLabel(
                         label = "負債比率 ： ",
                         items = debtAssetItems.map{ it.title },
                         onSelectionChanged = {  i ->
                             debtAssetRange = debtAssetItems.map{it.key}[i]
+                        },
+                        defaultIndex = run {
+                            debtAssetItems.indexOfFirst { it.key == debtAssetRange }.takeIf { it != -1 } ?: 0
                         }
                     )
 
                     //  株価収益率 PER
                     val perItems = listOf(
                         DropMenuItemData("", ""),
-                        DropMenuItemData("50,", "High (>50x)"),
-                        DropMenuItemData("2,10", "Low (2x to <10x)"),
                         DropMenuItemData(",0", "Unprofitable (<0x)"),
-                        DropMenuItemData("0,", "Profitable (>0x)"),
+                        DropMenuItemData("0,20", "Low (0x to <20x)"),
+                        DropMenuItemData("20,30", "Medium (20x to <30x)"),
+                        DropMenuItemData("30,", "High (>30x)"),
                     )
                     DropdownMenuWithLabel(
                         label = "株価収益率 ： ",
                         items = perItems.map{ it.title },
                         onSelectionChanged = {  i ->
                             perRange = perItems.map{it.key}[i]
+                        },
+                        defaultIndex = run {
+                            perItems.indexOfFirst { it.key == perRange }.takeIf { it != -1 } ?: 0
                         }
                     )
 
@@ -168,7 +186,7 @@ fun SideDrawer(
                     val pbrItems = listOf(
                         DropMenuItemData("", ""),
                         DropMenuItemData(",1", "0～1"),
-                        DropMenuItemData("1,2", "1～2"),
+                        DropMenuItemData(",2", "0～2"),
                         DropMenuItemData("2,", "2～"),
                     )
                     DropdownMenuWithLabel(
@@ -176,6 +194,9 @@ fun SideDrawer(
                         items = pbrItems.map{ it.title },
                         onSelectionChanged = {  i ->
                             pbrRange = pbrItems.map{it.key}[i]
+                        },
+                        defaultIndex = run {
+                            pbrItems.indexOfFirst { it.key == pbrRange }.takeIf { it != -1 } ?: 0
                         }
                     )
 
@@ -192,21 +213,41 @@ fun SideDrawer(
                         items = dividendYieldItems.map{ it.title },
                         onSelectionChanged = {  i ->
                             dividendYieldRange = dividendYieldItems.map{it.key}[i]
+                        },
+                        defaultIndex = run {
+                            dividendYieldItems.indexOfFirst { it.key == dividendYieldRange }.takeIf { it != -1 } ?: 0
                         }
                     )
 
                     BasicSlider()
 
-
                     Spacer(modifier = Modifier.width(16.dp))
-                    Button(onClick = {
-                        onSubmit(listOf(
-                            exchange, sector, yearChangeRange,movingAverageRange,
-                            debtAssetRange, perRange, pbrRange,dividendYieldRange
-                          )
-                        )
-                    }) {
-                        Text("検索")
+
+                    Row {
+                        Button(onClick = {
+                            exchange = ""
+                            sector = ""
+                            yearChangeRange = ""
+                            movingAverageRange = ""
+                            debtAssetRange = ""
+                            perRange = ""
+                            pbrRange = ""
+                            dividendYieldRange = ""
+                        }) {
+                            Text("初期化")
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Button(onClick = {
+                            onSubmit(listOf(
+                                exchange, sector, yearChangeRange,movingAverageRange,
+                                debtAssetRange, perRange, pbrRange,dividendYieldRange
+                              )
+                            )
+                        }) {
+                            Text("検索")
+                        }
                     }
 
                 }
@@ -237,7 +278,12 @@ fun DropdownMenuWithLabel(
     defaultIndex: Int = 0,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(0) }
+    var selectedIndex by remember { mutableStateOf(defaultIndex.coerceIn(0, items.lastIndex)) }
+
+    // 使用 LaunchedEffect 监听 defaultIndex 的变化并更新 selectedIndex
+    LaunchedEffect(defaultIndex) {
+        selectedIndex = defaultIndex.coerceIn(0, items.lastIndex)
+    }
 
     Row() {
         TextButton(
@@ -261,7 +307,6 @@ fun DropdownMenuWithLabel(
                     }
                 ) {
                     Column {
-//                        Text(text = item)
                         Text(text = item, style = MaterialTheme.typography.caption) // 调整描述的样式
                     }
                 }

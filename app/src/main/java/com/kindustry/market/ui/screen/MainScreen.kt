@@ -25,7 +25,6 @@ val LocalPaddingValues = staticCompositionLocalOf<PaddingValues> { error("No Pad
 @Composable
 fun MainScreen(
     navController: NavController,
-    reopened: String = "false",
     mainViewModel: MainViewModel,
     onSearchClick: (String) -> Unit,
     onListClick: (List<Any>) -> Unit,
@@ -41,14 +40,16 @@ fun MainScreen(
 
     var symbol by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+    var queryCondition:List<Any> by remember { mutableStateOf(listOf()) }
 
     // 获取一次  市场区分
     val exchangeList = mainViewModel.allExchangeFlow.collectAsState(initial = emptyList()).value
     val sectorList = mainViewModel.allSectorFlow.collectAsState(initial = emptyList()).value
 
     // 订阅 equitysFlow 并更新 equitys 列表
-    val equities by mainViewModel.equityListFlow.collectAsState()
     val equity by mainViewModel.equityFlow.collectAsState()
+
+
 
     Scaffold (
         topBar = {
@@ -72,6 +73,7 @@ fun MainScreen(
                 }
             )
 
+            // 銘柄検索
             if (showSearchDialog) {
                 SearchDialog {
                     if (it.trim() != "") {
@@ -82,7 +84,7 @@ fun MainScreen(
                 }
             }
 
-            // TODO
+            // 条件検索
             if (showFilterDialog) {
                 Dialog(
                     onDismissRequest = { showFilterDialog = false },
@@ -90,13 +92,15 @@ fun MainScreen(
                     content = {
                         SideDrawer(
                             exchangeList,
-                            sectorList
-                        ) { data: List<Any> ->
+                            sectorList,
+                            queryCondition
+                        ) { condition: List<Any> ->
                             showFilterDialog = false
-                            screenState.value = ScreenState.A
                             // Handle the case where the list is empty
-                            if (data.isNotEmpty()) {
-                                onListClick(data)
+                            if (condition.isNotEmpty()) {
+                                queryCondition = condition
+                                onListClick(queryCondition)
+                                screenState.value = ScreenState.A
                                 symbol = ""
                                 name = ""
                             }
@@ -129,7 +133,7 @@ fun MainScreen(
                 BottomNavigationItem(
                     selected = true,
                     onClick =  {
-//                        onChartClick("","")  //  TODO
+                        //  TODO  onChartClick("","")
                         screenState.value = ScreenState.C
                      } ,
                     icon = { Icon(Icons.Default.BarChart, contentDescription = "BarChart") },
