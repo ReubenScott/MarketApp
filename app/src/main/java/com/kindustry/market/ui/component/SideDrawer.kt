@@ -33,6 +33,7 @@ fun SideDrawer(
     var perRange by remember { mutableStateOf(queryCondition.getOrNull(5) ?: "") }
     var pbrRange by remember { mutableStateOf(queryCondition.getOrNull(6) ?: "") }
     var dividendYieldRange by remember { mutableStateOf(queryCondition.getOrNull(7) ?: "") }
+    var priceRange by remember { mutableStateOf(queryCondition.getOrNull(8) ?: "") }
 
     var isBoxVisible by remember { mutableStateOf(true) }
     var boxBounds by remember { mutableStateOf(Rect.Zero) }
@@ -200,7 +201,7 @@ fun SideDrawer(
                         }
                     )
 
-                    //  股息
+                    //  配当利回り
                     val dividendYieldItems = listOf(
                         DropMenuItemData("", ""),
                         DropMenuItemData(",0", "No Dividend"),
@@ -209,13 +210,35 @@ fun SideDrawer(
                         DropMenuItemData("10,", "Very High Yield (>10%)"),
                     )
                     DropdownMenuWithLabel(
-                        label = "股息 ： ",
+                        label = "配当利回り ： ",
                         items = dividendYieldItems.map{ it.title },
                         onSelectionChanged = {  i ->
                             dividendYieldRange = dividendYieldItems.map{it.key}[i]
                         },
                         defaultIndex = run {
                             dividendYieldItems.indexOfFirst { it.key == dividendYieldRange }.takeIf { it != -1 } ?: 0
+                        }
+                    )
+
+                    //  株価
+                    val priceItems = listOf(
+                        DropMenuItemData("", ""),
+                        DropMenuItemData(",200", "Very Low (<200)"),
+                        DropMenuItemData("200,500", "Low (200～500)"),
+                        DropMenuItemData("500,1000", "Mid-Low (500～1000)"),
+                        DropMenuItemData("1000,2000", "Mid (1000～2000)"),
+                        DropMenuItemData("2000,4000", "Mid-High (2000～4000)"),
+                        DropMenuItemData("4000,8000", "High (4000～8000)"),
+                        DropMenuItemData("8000,", "Very High (>8000)"),
+                    )
+                    DropdownMenuWithLabel(
+                        label = "株価 ： ",
+                        items = priceItems.map{ it.title },
+                        onSelectionChanged = {  i ->
+                            priceRange = priceItems.map{it.key}[i]
+                        },
+                        defaultIndex = run {
+                            priceItems.indexOfFirst { it.key == priceRange }.takeIf { it != -1 } ?: 0
                         }
                     )
 
@@ -233,6 +256,7 @@ fun SideDrawer(
                             perRange = ""
                             pbrRange = ""
                             dividendYieldRange = ""
+                            priceRange = ""
                         }) {
                             Text("初期化")
                         }
@@ -241,8 +265,8 @@ fun SideDrawer(
 
                         Button(onClick = {
                             onSubmit(listOf(
-                                exchange, sector, yearChangeRange,movingAverageRange,
-                                debtAssetRange, perRange, pbrRange,dividendYieldRange
+                                exchange, sector, yearChangeRange, movingAverageRange,
+                                debtAssetRange, perRange, pbrRange, dividendYieldRange, priceRange
                               )
                             )
                         }) {

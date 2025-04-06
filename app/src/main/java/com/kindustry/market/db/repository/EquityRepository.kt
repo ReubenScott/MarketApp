@@ -27,7 +27,8 @@ class CompanyRepository @Inject constructor(
         val debtAssetRange = any.getOrNull(4) as? String // 負債率
         val perRange = any.getOrNull(5) as? String // PER
         val pbrRange = any.getOrNull(6) as? String // PBR
-        val dividendYieldRange = any.getOrNull(7) as? String // 股息
+        val dividendYieldRange = any.getOrNull(7) as? String // 配当利回り
+        val priceRange = any.getOrNull(8) as? String // 現在株価
 
         val parameters = mutableListOf<Any?>() // 创建一个可变列表来存储参数
 
@@ -58,8 +59,11 @@ class CompanyRepository @Inject constructor(
         // PBR 株価純資産倍率
         addQueryRangeCondition("pbr", pbrRange, queryBuilder , parameters)
 
-        // 股息
+        // 配当利回り
         addQueryRangeCondition("dividend_yield", dividendYieldRange, queryBuilder , parameters)
+
+        // 現在株価
+        addQueryRangeCondition("present_price", priceRange, queryBuilder , parameters)
 
         queryBuilder.append(" AND delisting_date is NULL")  // 上場廃止日
 

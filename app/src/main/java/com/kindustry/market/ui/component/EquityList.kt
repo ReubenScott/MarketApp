@@ -43,17 +43,16 @@ import com.kindustry.market.viewmodel.MainViewModel
 @Composable
 fun EquityList (
     viewModel: MainViewModel,
-    onSubmit: (String, String) -> Unit
+//    onSelect: (String, String) -> Unit
 ) {
-//    val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
     val isAscending by viewModel.isAscendingFlow.collectAsState()
     val sortColumn by viewModel.sortColumnFlow.collectAsState()
-    val sortedEquities by viewModel.equityListFlow.collectAsState()
+    val equityInfoList by viewModel.equityInfoListFlow.collectAsState()
     val position by viewModel.scrollPosition.collectAsState()
     val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = position)
 
-    LaunchedEffect(sortColumn, isAscending, position) {
+    LaunchedEffect(sortColumn, isAscending) {
         viewModel.sortEquityInfo(sortColumn, isAscending)
         lazyListState.scrollToItem(position)
     }
@@ -71,27 +70,29 @@ fun EquityList (
         "市場区分" to "exchange",
         "上場日" to "listingDate",
         "業種" to "sector",
+        "現在株価" to "presentPrice",
         "上昇率" to "yearChangeRatio",
         "乖離率" to "movingAverageRatio",
         "負債率" to "debtAssetRatio",
         "PER" to "per",
         "PBR" to "pbr",
-        "股息" to "dividendYield",
+        "配当" to "dividendYield",
         "時価総額" to "marketCap"
     )
 
     val headerList: List<String> = headerMap.keys.toList()
-//    val headerList = listOf("コード", "銘柄名", "業種","股息", "負債率", "PER", "PBR", "上昇率", "乖離率")
-    val weightList = listOf(80, 150, 130, 90, 150, 80, 80, 80, 80, 80, 80, 100)
+//    val headerList = listOf("コード", "銘柄名", "業種","配当利回り", "負債率", "PER", "PBR", "上昇率", "乖離率")
+    val weightList = listOf(80, 150, 130, 90, 150, 100, 80, 80, 80, 80, 80, 80, 100)
 
 //  text = item.name?.take(10)?.plus("...") ?: "", // 当 name 为 null 时，显示默认值
-    val dataList =  sortedEquities.map { it ->
+    val dataList =  equityInfoList.map { it ->
         listOf(
             it.symbol,
             it.name,
             it.exchange,
             it.listingDate,
             it.sector,
+            it.presentPrice?.toString(),
             it.yearChangeRatio?.let { "${String.format("%.2f", it)}%" },
             it.movingAverageRatio?.let { "${String.format("%.2f", it)}%" },
             it.debtAssetRatio?.let { "${String.format("%.2f", it)}%" },
@@ -157,11 +158,11 @@ fun EquityList (
             ) {
                 // 数据行
                 itemsIndexed(dataList) { rowIndex, row ->
-                    var isExpanded by remember {
+                    var isClicked by remember {
                         mutableStateOf(false)
                     }
                     val surfaceColor: Color by animateColorAsState(
-                        if (isExpanded) Color.Blue else Color.Black
+                        if (isClicked) Color.Blue else Color.Black
                     )
                     Row(
                         modifier = Modifier
@@ -171,9 +172,10 @@ fun EquityList (
                                 if (rowIndex % 2 == 0) Color.White else Color.LightGray
                             )
                             .clickable {
-                                isExpanded = !isExpanded
+                                isClicked = !isClicked
                                 // 在这里处理点击事件 symbol, name
-                                onSubmit(row[0] ?: "", row[1] ?: "")
+                                // onSelect(row[0] ?: "", row[1] ?: "")
+                                viewModel.updateCurrentEquityInfo(rowIndex)
                             }
                     ) {
                         row.forEachIndexed { columnIndex, cell ->

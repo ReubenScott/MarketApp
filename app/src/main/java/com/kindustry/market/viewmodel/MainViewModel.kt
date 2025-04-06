@@ -17,6 +17,7 @@ data class EquityInfo(
     val exchange: String,  // 市場区分
     val listingDate: String,  // 上場日
     val sector: String,  // 東証業種名
+    val presentPrice: Float?,  // 現在株価
     val dividendYield: Float?,  // 配当利回り
     val debtAssetRatio: Float?,  // 負債比率  (债务权益比率debtEquityRatioから計算)
     val per: Float?,  // 株価収益率
@@ -39,6 +40,7 @@ class MainViewModel @Inject constructor(
             exchange ?: "" ,
             listingDate ?: "" ,
             sector ?: "" ,
+            presentPrice ,
             dividendYield ,
             debtAssetRatio ,
             per ,
@@ -49,14 +51,14 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    //  Equity Flow
-    private val _equityListState = MutableStateFlow<List<EquityInfo>>(emptyList())
-    val equityListFlow: StateFlow<List<EquityInfo>> = _equityListState.asStateFlow()
+    //  EquityInfo Flow
+    private val _equityInfoListState = MutableStateFlow<List<EquityInfo>>(emptyList())
+    val equityInfoListFlow: StateFlow<List<EquityInfo>> = _equityInfoListState.asStateFlow()
 
     fun randomGet() {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _equityListState.value = companyRepository.randomEquitys.first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
+            _equityInfoListState.value = companyRepository.randomEquitys.first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
         }
     }
 
@@ -69,7 +71,7 @@ class MainViewModel @Inject constructor(
                     if (equityItem != null) listOf(equityItem) else emptyList() // Create a list
                 }
                 .collect { EquityInfoList  ->
-                    _equityListState.value = EquityInfoList
+                    _equityInfoListState.value = EquityInfoList
                 }
         }
     }
@@ -103,7 +105,7 @@ class MainViewModel @Inject constructor(
     fun sortEquityInfo(sortColumn: String, isAscending: Boolean) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            var equities =  _equityListState.value
+            var equities =  _equityInfoListState.value
             equities = when (sortColumn) {
                 "name" -> if (isAscending) equities.sortedBy { it.name } else equities.sortedByDescending { it.name }
                 "exchange" -> if (isAscending) equities.sortedBy { it.exchange } else equities.sortedByDescending { it.exchange }
@@ -118,29 +120,69 @@ class MainViewModel @Inject constructor(
                 "marketCap" -> if (isAscending) equities.sortedBy { it.marketCap } else equities.sortedByDescending { it.marketCap }
                 else -> if (isAscending) equities.sortedBy { it.symbol } else equities.sortedByDescending { it.symbol } // 默认按 symbol 排序
             }
-            _equityListState.value = equities
+            _equityInfoListState.value = equities
         }
     }
 
-//    fun searchEquitys(exchange: String, sector: String): StateFlow<List<EquityInfo>> {
-//        viewModelScope.launch {
-//            _equityState.value = companyRepository.getQueryEquitys(exchange, sector).first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
-//        }
-//        return equitysFlow
-//    }
+    //  EquityInfo Flow
+    private val _equityInfoState = MutableStateFlow<EquityInfo?>(null)
+    val equityInfoFlow: StateFlow<EquityInfo?> = _equityInfoState.asStateFlow()
+
+    fun updateCurrentEquityInfo(index: Int) {
+        viewModelScope.launch {
+            // collect 是一个挂起函数，它会持续监听 Flow 的数据流
+            equityInfoListFlow.collect { equityList ->
+                if (index in equityList.indices) {
+                    _equityInfoState.value = equityList[index]
+                }
+            }
+        }
+    }
+
+    // 水平滑动事件
+    fun swipeScreenEquity(offset: Int) {
+        viewModelScope.launch {
+            val currentEquityInfo = _equityInfoState.value
+            val equityInfoList = _equityInfoListState.value // Get current list
+
+            if (currentEquityInfo != null) {
+                val currentIndex = equityInfoList.indexOf(currentEquityInfo)
+                val nextIndex = currentIndex + offset  // 使用 offset
+
+                if (nextIndex in equityInfoList.indices) {
+                    _equityInfoState.value = equityInfoList[nextIndex]
+                } else {
+                    _equityInfoState.value = null // Or handle boundary condition as needed
+                }
+            }
+
+            if (_equityInfoState.value == null)  {
+                if(offset >= 0 ){
+                    //如果当前equityInfo是null，你想设置成列表第一个元素吗？
+                    _equityInfoState.value = equityInfoList.firstOrNull()
+                } else {
+                    _equityInfoState.value = equityInfoList.lastOrNull()
+                }
+            }
+
+            // 同时更新equity
+            _equityInfoState.value?.let {_equityState.value = companyRepository.findEquityBySymbol(it.symbol).first() }
+        }
+    }
+
 
 
     fun filterEquities(any: List<Any>) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _equityListState.value = companyRepository.filterEquities(any).first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
+            _equityInfoListState.value = companyRepository.filterEquities(any).first().map{ it.toEquityInfo() }  // 使用扩展函数进行转换
         }
     }
 
     fun findEquityBySymbolOrName(codeOrName: String) {
         // 启动一个协程（Coroutine）
         viewModelScope.launch {
-            _equityListState.value = companyRepository.findEquityBySymbolOrName(codeOrName).first().map{ it.toEquityInfo() } // 使用扩展函数进行转换
+            _equityInfoListState.value = companyRepository.findEquityBySymbolOrName(codeOrName).first().map{ it.toEquityInfo() } // 使用扩展函数进行转换
         }
     }
 

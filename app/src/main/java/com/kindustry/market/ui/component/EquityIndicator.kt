@@ -1,4 +1,4 @@
-package com.kindustry.market.component
+package com.kindustry.market.ui.component
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -9,16 +9,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kindustry.market.db.entity.Equity
 import com.kindustry.market.ui.screen.LocalPaddingValues
+import com.kindustry.market.ui.screen.onHorizontalSwipe
+import com.kindustry.market.viewmodel.MainViewModel
 
 @Composable
-fun EquityIndicator(equity: Equity?){
+fun EquityIndicator(
+    mainViewModel: MainViewModel
+){
+    // 订阅 equitysFlow 并更新 equitys 列表
+    val equity by mainViewModel.equityFlow.collectAsState()
 
     Row(
         modifier = Modifier
             .padding(all = 8.dp)
             .background(MaterialTheme.colors.background)
+            .onHorizontalSwipe(
+                onSwipeLeft = { mainViewModel.swipeScreenEquity(1) },
+                onSwipeRight = { mainViewModel.swipeScreenEquity(-1) }
+            )
     ) {
         Column(
             modifier = Modifier.padding(LocalPaddingValues.current)

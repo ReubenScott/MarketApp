@@ -9,10 +9,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-//import androidx.compose.foundation.lazy.grid.GridCells
-//import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-//import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-//import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -154,14 +150,8 @@ fun ScrollableTable(
         sortedList.toMutableStateList()
     }*/
 
-    val isAscending by viewModel.isAscendingFlow.collectAsState()
-    val sortColumn by viewModel.sortColumnFlow.collectAsState()
-    val sortedEquitys by viewModel.equityListFlow.collectAsState()
+    val sortedEquitys by viewModel.equityInfoListFlow.collectAsState()
 
-    LaunchedEffect(sortColumn, isAscending,position) {
-        viewModel.sortEquityInfo(sortColumn, isAscending)
-        lazyListState.scrollToItem(position)
-    }
 
     DisposableEffect(lazyListState) {
         onDispose {
@@ -201,8 +191,6 @@ fun ScrollableTable(
                     onClick = {
 //                        isAscending = !isAscending
 //                        sortColumn = "symbol"
-                        viewModel.updateIsAscending(!isAscending)
-                        viewModel.updateSortColumn("symbol")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -213,8 +201,6 @@ fun ScrollableTable(
                     onClick = {
 //                        isAscending = !isAscending
 //                        sortColumn = "name"
-                        viewModel.updateIsAscending(!isAscending)
-                        viewModel.updateSortColumn("name")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -225,13 +211,11 @@ fun ScrollableTable(
                     onClick = {
 //                        isAscending = !isAscending
 //                        sortColumn = "sector"
-                        viewModel.updateIsAscending(!isAscending)
-                        viewModel.updateSortColumn("sector")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
                 ClickableText(
-                    text = buildAnnotatedString { append("股息") },
+                    text = buildAnnotatedString { append("配当") },
                     style = MaterialTheme.typography.h6.copy(
                         color = Color.White,
                         textAlign = TextAlign.End
@@ -240,8 +224,6 @@ fun ScrollableTable(
                     onClick = {
 //                        isAscending = !isAscending
 //                        sortColumn = "dividendYield"
-                        viewModel.updateIsAscending(!isAscending)
-                        viewModel.updateSortColumn("dividendYield")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -255,8 +237,6 @@ fun ScrollableTable(
                     onClick = {
 //                        isAscending = !isAscending
 //                        sortColumn = "debtAssetRatio"
-                        viewModel.updateIsAscending(!isAscending)
-                        viewModel.updateSortColumn("debtAssetRatio")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -270,8 +250,6 @@ fun ScrollableTable(
                     onClick = {
 //                        isAscending = !isAscending
 //                        sortColumn = "per"
-                        viewModel.updateIsAscending(!isAscending)
-                        viewModel.updateSortColumn("per")
                     }
                 )
                 Spacer(modifier = Modifier.weight(1f)) // 添加一个 Spacer 来分隔字段名和内容
@@ -285,8 +263,6 @@ fun ScrollableTable(
                     onClick = {
 //                        isAscending = !isAscending
 //                        sortColumn = "pbr"
-                        viewModel.updateIsAscending(!isAscending)
-                        viewModel.updateSortColumn("pbr")
                     }
                 )
             }
@@ -392,8 +368,6 @@ fun HeaderItem(label: String, viewModel: MainViewModel, isAscending: Boolean) {
         style = MaterialTheme.typography.h6.copy(color = Color.White, textAlign = TextAlign.End), // 使用主题中的标题样式，并设置颜色为白色
 //        modifier = Modifier.weight(1f), // 让字段名占据整个宽度
         onClick = {
-            viewModel.updateIsAscending(!isAscending)
-            viewModel.updateSortColumn("pbr")
         }
     )
 }

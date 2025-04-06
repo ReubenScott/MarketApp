@@ -9,37 +9,49 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.kindustry.market.db.entity.Equity
 import com.kindustry.market.ui.screen.LocalPaddingValues
+import com.kindustry.market.ui.screen.onHorizontalSwipe
+import com.kindustry.market.viewmodel.MainViewModel
 
 @Composable
 fun EquityBasicInfo(
-    equity: Equity?
+    mainViewModel: MainViewModel
 ) {
+    // 订阅 equityFlow 并更新 equity
+    val equity by mainViewModel.equityFlow.collectAsState()
+
     Column(
         modifier = Modifier.padding(LocalPaddingValues.current)
             .verticalScroll(rememberScrollState())
+            .onHorizontalSwipe(
+                onSwipeLeft = { mainViewModel.swipeScreenEquity(1) },
+                onSwipeRight = { mainViewModel.swipeScreenEquity(-1) }
+            )
     ) {
         Text(text = "銘柄基本情報", style = MaterialTheme.typography.h5)
         InfoRow("社名", equity?.name ?: "")
-        InfoRow("業種", equity?.sector ?: "")
-        InfoRow("代表者", equity?.representative ?: "")
-        InfoRow("資本金", equity?.capitalStock ?: "")
+        InfoRow("上場市場", equity?.exchange ?: "")
+        InfoRow("設立年月日", equity?.establishedDate ?: "")
+        InfoRow("上場年月日", equity?.listingDate ?: "")
+        InfoRow("日経業種分類", equity?.industry ?: "")
+        InfoRow("東証業種名", equity?.sector ?: "")
         InfoRow("本社住所", equity?.address ?: "")
         InfoRow("電話番号", equity?.tel ?: "")
-        InfoRow("上場市場", equity?.exchange ?: "")
-        InfoRow("上場年月日", equity?.listingDate ?: "")
+        InfoRow("代表者", equity?.representative ?: "")
+        InfoRow("資本金", equity?.capitalStock ?: "")
         InfoRow("単元株数", equity?.perUnit ?: "")
         InfoRow("事業内容", equity?.businessScope ?: "")
         InfoRow("取扱い商品", equity?.productRange ?: "")
         InfoRowLink("URL", equity?.url ?: "")
     }
+
 }
 
 @Composable
